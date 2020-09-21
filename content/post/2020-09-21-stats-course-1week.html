@@ -1,0 +1,187 @@
+---
+title: "Week 1: Introduction"
+author: ~
+date: '2020-09-21'
+slug: stats-course-1week
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+
+
+<div id="why-r" class="section level2">
+<h2>Why R</h2>
+<p>R is one of the most complex and sofisticated statistical softwares. The current acceptance of the software is high. There are infinite number of applications from R from linear regression, books, journals and APPs in the last few years. Scientists are constantly updating the program and all the packages for us to find it easier to interact with it.
+In these documents we will provide you with the code required to replicate the main graphs during the course in your computer the major elements of the code with some explanations of what does each element do. At the same time you will be familiar with a program that is a great skill in the field of environmental science, programing and statistics in general.</p>
+<pre class="r"><code>#install.packages(qcc) #run this to install a package that lets you create the graph
+x=c(4,5,8,7)
+names(x)=c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;)
+library(qcc) # to use all the functions from that package then run this once per session
+pareto.chart(x,ylab=&quot;Change (Million People)&quot;,ylab2=&quot;Cumulative Percentage&quot;)</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre><code>##    
+## Pareto chart analysis for x
+##     Frequency Cum.Freq. Percentage Cum.Percent.
+##   C   8.00000   8.00000   33.33333     33.33333
+##   D   7.00000  15.00000   29.16667     62.50000
+##   B   5.00000  20.00000   20.83333     83.33333
+##   A   4.00000  24.00000   16.66667    100.00000</code></pre>
+</div>
+<div id="ggplot2-graphical-package-option" class="section level2">
+<h2>ggplot2 graphical package option</h2>
+<p>There is no better package for graphs than ggplot2, the new functions in R and other output aim to set code that are ggplot compatible. There is a lot to learn with a lot of information online.</p>
+<pre class="r"><code>#install.packages(&quot;ggQC&quot;) #the new qcc package for ggplot graphs
+library(ggQC)
+library(gcookbook)
+library(ggplot2)
+data(&quot;uspopchange&quot;) # let&#39;s use the change in population in america as and example
+#uspopchange
+usa.pop&lt;-uspopchange[1:10,] # there are a lot of states so we can just take the first 10 states for the example data set
+ggplot(usa.pop,aes(x=State,y=Change))+
+  ggQC::stat_pareto(point.color = &quot;red&quot;, 
+                    point.size = 3, 
+                    line.color = &quot;black&quot;,
+                    bars.fill = c(&quot;steelblue&quot;,&quot;tomato&quot;))+ #fill of the bars is continous therefore you need to set the first and last and you will get a gradient for all the bars 
+  theme_bw() #remove the background colour and keep the major and minor axis and some other plot structures </code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>This clearly looks much better with more control over the elements. There are a few things that we can change to make them better like labels better axis, a legend because double y axis can misslead the readers. In the following example we will use all the data set as R is better at working with large data sets.</p>
+<pre class="r"><code>#install.packages(scales) # use the percent and other notation on the axis
+data(&quot;uspopchange&quot;)
+usa.pop &lt;- usa.pop[order(usa.pop$Change, decreasing=TRUE),] #order the data set by the values of Change in a decreasing order
+usa.pop$State&lt;-factor(usa.pop$State,levels = usa.pop$State) #countries labels in the right place
+p=ggplot(usa.pop,aes(x=State,y=Change))+
+  ggQC::stat_pareto(point.color = &quot;red&quot;, 
+                    point.size = 2.5, 
+                    shape=15,
+                    line.color = &quot;black&quot;,
+                    bars.fill = c(&quot;steelblue&quot;,&quot;tomato&quot;))+
+  scale_y_continuous(breaks = c(0,50,100,sum(usa.pop$Change)), # we need to control the left y axis breaks
+                     sec.axis = sec_axis(~./sum(usa.pop$Change)*100, #this is Cumulative Sum(y)/sum(all states in change)*100 (%)
+                                         breaks = c(0,25,50,75,100), # which breaks do you want to show
+                                         labels = scales::percent_format(scale = 1), #from the package scales use :: percent, we need to use percent_format(scale=1) because transform the axis in 100 already 
+                                         name = &quot;Country Cumulative Change&quot;))+ # give it a name
+  geom_text(aes(label=Change),nudge_y = -2.5,colour=&quot;white&quot;,size=3)+ 
+  labs(title=&quot;Pareto Chart&quot;,y=&quot;Population Change (million people)&quot;)+
+  theme_bw(base_size = 13,base_family = &quot;serif&quot;) #sans= Arial, mono= Courier, serif= Times New Roman
+p</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code># This is nearly perfect yet the legend is not showing in our figure so we can add it ourselfs
+# first, we will need need to have a data set that can be used to add a legend to the figure
+legend.df=data.frame(x=1,y=130,label=&quot;Cumulative Change&quot;) #data frame required by ggplot2
+ p+ geom_point(legend.df,mapping=aes(x=x,y=y),colour=&quot;red&quot;,size=3,shape=15)+ #point 
+   geom_text(legend.df,mapping=aes(x=x,y=y,label=label),
+             hjust=&quot;left&quot;, #text starts from the x,y place
+             nudge_x = 0.2, #add some gap btw the point and the text along the x axis
+             colour=&quot;black&quot;)+ #text colour
+   annotate(&quot;rect&quot;,xmin=0.8,xmax=1.2,ymax=127,ymin=133,alpha=0.2) #build a box to avoid confusion</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<p>Here we clearly have full control of the elemnts of the plot. It may look like a lot of work but once you get familiar with the sentences functions elements it will be easier and of course many other plot will use the same coding structure in the R universe. Now, despite it takes more than a few clicks to get our Pareto Chart in you added more knowledge like:</p>
+<ul>
+<li>Order data sets by different variables.</li>
+<li>Add a second y axis.</li>
+<li>Change the labels, breask of axis (for x axis just replace y with x).</li>
+<li>Give better axis labels.</li>
+<li>Add text inside figures and for each level of the category.</li>
+<li>Change the theme of plots.</li>
+<li>Change the text font family, colour and size.</li>
+<li>Add points text rectagles to build a special legends.</li>
+</ul>
+</div>
+<div id="histograms" class="section level2">
+<h2>Histograms</h2>
+<p>Histograms help you to visualize the approximate distribution of your data. It is similar to the bar plot but we can change the number of <code>bins</code> that we want to display, depending on the quantity of your observations we may need more or less. The default number of bins is 30, here, will do the job for large data sets, while small data sets can use a smaller <code>bins</code> to avoid gaphs. We will use <code>geom_histogram</code> and other parameters depending on your needs.</p>
+<pre class="r"><code>ggplot(diamonds,aes(x=price))+
+  geom_histogram(bins = 45,fill=&quot;steelblue&quot;,colour=&quot;black&quot;)</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>We have other options like <code>binwidth</code> which defines the width of each bin to the selected value in units of x. In the example above we said to draw 45 bins and now we want as many bins as long each is 2 x units.</p>
+<pre class="r"><code>#install.packages(UsingR) # get the data set
+library(UsingR)
+ggplot(father.son, aes(x = fheight*2.54)) +      # units transforamtion                     
+  geom_histogram(aes(y = ..density..),fill=&quot;grey80&quot;,binwidth = 2) +  #bins each 2cm height
+  geom_density()+ #density distribution on top of the histograms
+  theme_light()</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="box-plots" class="section level2">
+<h2>Box plots</h2>
+<p>They are great ways to represent the distribution of the data. Boxplots are extreamly good at that as we can easily see the middian, interquartile range (IQR), minimum, maximum values as well as any outliyer presented in the data.</p>
+<p>We will plot the height of the characters from Star wars saga grouped by their genders</p>
+<pre class="r"><code>#install.packages(&quot;tidyverse&quot;)
+#install.packages(&quot;ggsci&quot;)
+library(tidyverse)
+library(ggsci)
+ggplot(starwars, aes(x = gender, y = height)) +
+  geom_boxplot(aes(fill=gender))+ # fill each boxplot by gender 
+  scale_fill_aaas(alpha = 0.8) # add some transparency to the fill colour 0.2</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+</div>
+<div id="qq-plot" class="section level2">
+<h2>QQ plot</h2>
+<p>Lastly, one very important scater plot uses the function <code>geom_qq</code> which creates QQ plots to check the normality of the data, it compares the empirical distribution to a theoretical one. Use <code>geom_qq()</code> and <code>geom_qq_line()</code> and the <code>**sample= variable**</code>.</p>
+<pre class="r"><code>#install.packages(gcookbook)
+#install.packages(gapminder)
+library(gcookbook)
+library(gapminder)
+#normally distributed
+ggplot(heightweight, aes(sample = heightIn)) +
+  geom_qq() + #points 
+  geom_qq_line() #line
+
+#not normally distributed 
+ggplot(gapminder, aes(sample = lifeExp)) +
+  geom_qq() +
+  geom_qq_line()+
+  facet_wrap(.~continent,nrow = 2)+
+  theme_test()</code></pre>
+<div class="figure"><span id="fig:unnamed-chunk-7"></span>
+<img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-7-1.png" alt="QQ plot for normally distributed data (left), not normally distributed (right)" width="50%" /><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-7-2.png" alt="QQ plot for normally distributed data (left), not normally distributed (right)" width="50%" />
+<p class="caption">
+Figure 1: QQ plot for normally distributed data (left), not normally distributed (right)
+</p>
+</div>
+<p>with <code>facet_*</code> we can separate the data and have different groups and many different graphs.</p>
+</div>
+<div id="cumulative-distribution-function-cdf" class="section level2">
+<h2>Cumulative Distribution Function (CDF)</h2>
+<pre class="r"><code>ggplot(uspopchange,aes(x=Change))+
+  geom_histogram(bins = 10,fill=&quot;steelblue&quot;,colour=&quot;black&quot;) 
+#graphs shows some skewness 
+#install.packages(&quot;spatstat&quot;)
+ library(spatstat)
+ b &lt;- density(runif(uspopchange$Change)) #need to transform the data to 
+ f &lt;- CDF(b) # calculate the CDF of the population change in america
+ plot(f) # does not follow a normal distribution we should do some transformations</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-8-1.png" width="50%" /><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-8-2.png" width="50%" /></p>
+</div>
+<div id="correlation-plot-corelogram" class="section level2">
+<h2>Correlation plot &amp; Corelogram</h2>
+<pre class="r"><code>#install.packages(&quot;psych&quot;)
+#if (!requireNamespace(&quot;devtools&quot;)) install.packages(&quot;devtools&quot;) # if new to R run this line too, you will be able to obtain some packages created by the comunity 
+#devtools::install_github(&quot;caijun/ggcorrplot2&quot;) #cor plot package
+library(psych)
+library(ggcorrplot2)
+#get correlation test
+correlation.test &lt;- psych::corr.test(mtcars[,c(1,3,5:7)],use = &quot;pairwise&quot;,method = &quot;spearman&quot;)
+my.correlation&lt;-correlation.test$r # from the test get the correlation values
+p.values.correlation&lt;-correlation.test$p # from the test get the correlation p values
+
+ggcorrplot.mixed(my.correlation, #values in a matrix format
+                 upper = &quot;circle&quot;, #the upper part use circles
+                 lower = &quot;number&quot;,  #the lower part with numbers
+                 p.mat = p.values.correlation, # use the pvalues
+                 insig = &quot;label_sig&quot;,  #label the sig correlations
+                 sig.lvl = c(0.05, 0.01, 0.001)) #it will use * so we set the levels</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-9-1.png" width="80%" /></p>
+<pre class="r"><code>ggcorrplot(my.correlation, 
+                 method = &quot;square&quot;, 
+                 type=&quot;lower&quot;,
+                 p.mat = p.values.correlation, 
+                 insig = &quot;pch&quot;, #iuse a cross for the non sig correlations
+                  show.diag = F, #remove the diagonal correlations
+                 sig.lvl = c(0.05, 0.01, 0.001))</code></pre>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-9-2.png" width="80%" /></p>
+<ul>
+<li>we used the <code>ggcorrplot</code> or <code>ggcorrplot.mixed</code> to draw our correlation plot.</li>
+<li>Here, we added <code>p.mat= p.values.correlation</code> which had the correlation p values and set a significant level of 0.05; any value bigger than that it will be marked with a shape <code>pch</code>. We can remove the correlation by setting <code>insig="blank"</code></li>
+</ul>
+</div>

@@ -1,0 +1,201 @@
+---
+title: "Week 1: Introduction"
+author: ~
+date: '2020-09-21'
+slug: stats-course-1week
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE,
+                      echo = TRUE,
+                   cache = TRUE,
+                   message = FALSE,
+                   warning = FALSE)
+```
+
+## Why R
+
+R is one of the most complex and sofisticated statistical softwares. The current acceptance of the software is high. There are infinite number of applications from R from linear regression, books, journals and APPs in the last few years. Scientists are constantly updating the program and all the packages for us to find it easier to interact with it. 
+In these documents we will provide you with the code required to replicate the main graphs during the course in your computer the major elements of the code with some explanations of what does each element do. At the same time you will be familiar with a program that is a great skill in the field of environmental science, programing and statistics in general.
+
+```{r,message=FALSE}
+#install.packages(qcc) #run this to install a package that lets you create the graph
+x=c(4,5,8,7)
+names(x)=c("A","B","C","D")
+library(qcc) # to use all the functions from that package then run this once per session
+pareto.chart(x,ylab="Change (Million People)",ylab2="Cumulative Percentage")
+```
+
+## ggplot2 graphical package option
+
+There is no better package for graphs than ggplot2, the new functions in R and other output aim to set code that are ggplot compatible. There is a lot to learn with a lot of information online. 
+
+```{r}
+#install.packages("ggQC") #the new qcc package for ggplot graphs
+library(ggQC)
+library(gcookbook)
+library(ggplot2)
+data("uspopchange") # let's use the change in population in america as and example
+#uspopchange
+usa.pop<-uspopchange[1:10,] # there are a lot of states so we can just take the first 10 states for the example data set
+ggplot(usa.pop,aes(x=State,y=Change))+
+  ggQC::stat_pareto(point.color = "red", 
+                    point.size = 3, 
+                    line.color = "black",
+                    bars.fill = c("steelblue","tomato"))+ #fill of the bars is continous therefore you need to set the first and last and you will get a gradient for all the bars 
+  theme_bw() #remove the background colour and keep the major and minor axis and some other plot structures 
+```
+
+This clearly looks much better with more control over the elements. There are a few things that we can change to make them better like labels better axis, a legend because double y axis can misslead the readers. In the following example we will use all the data set as R is better at working with large data sets. 
+
+```{r,message=FALSE}
+#install.packages(scales) # use the percent and other notation on the axis
+data("uspopchange")
+usa.pop <- usa.pop[order(usa.pop$Change, decreasing=TRUE),] #order the data set by the values of Change in a decreasing order
+usa.pop$State<-factor(usa.pop$State,levels = usa.pop$State) #countries labels in the right place
+p=ggplot(usa.pop,aes(x=State,y=Change))+
+  ggQC::stat_pareto(point.color = "red", 
+                    point.size = 2.5, 
+                    shape=15,
+                    line.color = "black",
+                    bars.fill = c("steelblue","tomato"))+
+  scale_y_continuous(breaks = c(0,50,100,sum(usa.pop$Change)), # we need to control the left y axis breaks
+                     sec.axis = sec_axis(~./sum(usa.pop$Change)*100, #this is Cumulative Sum(y)/sum(all states in change)*100 (%)
+                                         breaks = c(0,25,50,75,100), # which breaks do you want to show
+                                         labels = scales::percent_format(scale = 1), #from the package scales use :: percent, we need to use percent_format(scale=1) because transform the axis in 100 already 
+                                         name = "Country Cumulative Change"))+ # give it a name
+  geom_text(aes(label=Change),nudge_y = -2.5,colour="white",size=3)+ 
+  labs(title="Pareto Chart",y="Population Change (million people)")+
+  theme_bw(base_size = 13,base_family = "serif") #sans= Arial, mono= Courier, serif= Times New Roman
+p
+# This is nearly perfect yet the legend is not showing in our figure so we can add it ourselfs
+# first, we will need need to have a data set that can be used to add a legend to the figure
+legend.df=data.frame(x=1,y=130,label="Cumulative Change") #data frame required by ggplot2
+ p+ geom_point(legend.df,mapping=aes(x=x,y=y),colour="red",size=3,shape=15)+ #point 
+   geom_text(legend.df,mapping=aes(x=x,y=y,label=label),
+             hjust="left", #text starts from the x,y place
+             nudge_x = 0.2, #add some gap btw the point and the text along the x axis
+             colour="black")+ #text colour
+   annotate("rect",xmin=0.8,xmax=1.2,ymax=127,ymin=133,alpha=0.2) #build a box to avoid confusion
+
+```
+
+Here we clearly have full control of the elemnts of the plot. It may look like a lot of work but once you get familiar with the sentences functions elements it will be easier and of course many other plot will use the same coding structure in the R universe. Now, despite it takes more than a few clicks to get our Pareto Chart in   you added more knowledge like:
+
+* Order data sets by different variables.
+* Add a second y axis.
+* Change the labels, breask of axis (for x axis just replace y with x).
+* Give better axis labels.
+* Add text inside figures and for each level of the category.
+* Change the theme of plots.
+* Change the text font family, colour and size. 
+* Add points text rectagles to build a special legends.
+
+## Histograms
+
+Histograms help you to visualize the approximate distribution of your data. It is similar to the bar plot but we can change the number of `bins` that we want to display, depending on the quantity of your observations we may need more or less. The default number of bins is 30, here, will do the job for large data sets, while small data sets can use a smaller `bins` to avoid gaphs. We will use `geom_histogram` and other parameters depending on your needs.
+
+```{r}
+ggplot(diamonds,aes(x=price))+
+  geom_histogram(bins = 45,fill="steelblue",colour="black")
+```
+
+We have other options like `binwidth` which defines the width of each bin to the selected value in units of x. In the example above we said to draw 45 bins and now we want as many bins as long each is 2 x units. 
+
+```{r,message=FALSE}
+#install.packages(UsingR) # get the data set
+library(UsingR)
+ggplot(father.son, aes(x = fheight*2.54)) +      # units transforamtion                     
+  geom_histogram(aes(y = ..density..),fill="grey80",binwidth = 2) +  #bins each 2cm height
+  geom_density()+ #density distribution on top of the histograms
+  theme_light()
+```
+
+
+## Box plots
+
+They are great ways to represent the distribution of the data. Boxplots are extreamly good at that as we can easily see the middian, interquartile range (IQR), minimum, maximum values as well as any outliyer presented in the data.
+
+We will plot the height of the characters from Star wars saga grouped by their genders
+
+```{r,warning=F}
+#install.packages("tidyverse")
+#install.packages("ggsci")
+library(tidyverse)
+library(ggsci)
+ggplot(starwars, aes(x = gender, y = height)) +
+  geom_boxplot(aes(fill=gender))+ # fill each boxplot by gender 
+  scale_fill_aaas(alpha = 0.8) # add some transparency to the fill colour 0.2
+```
+
+## QQ plot
+
+Lastly, one very important scater plot uses the function `geom_qq` which creates QQ plots to check the normality of the data, it compares the empirical distribution to a theoretical one. Use `geom_qq()` and `geom_qq_line()` and the ``**sample= variable**``. 
+
+```{r,out.width="50%",fig.show='hold',fig.cap="QQ plot for normally distributed data (left), not normally distributed (right)"}
+#install.packages(gcookbook)
+#install.packages(gapminder)
+library(gcookbook)
+library(gapminder)
+#normally distributed
+ggplot(heightweight, aes(sample = heightIn)) +
+  geom_qq() + #points 
+  geom_qq_line() #line
+
+#not normally distributed 
+ggplot(gapminder, aes(sample = lifeExp)) +
+  geom_qq() +
+  geom_qq_line()+
+  facet_wrap(.~continent,nrow = 2)+
+  theme_test()
+```
+
+with `facet_*` we can separate the data and have different groups and many different graphs.
+
+## Cumulative Distribution Function (CDF)
+
+
+```{r,out.width="50%",fig.show='hold'}
+ggplot(uspopchange,aes(x=Change))+
+  geom_histogram(bins = 10,fill="steelblue",colour="black") 
+#graphs shows some skewness 
+#install.packages("spatstat")
+ library(spatstat)
+ b <- density(runif(uspopchange$Change)) #need to transform the data to 
+ f <- CDF(b) # calculate the CDF of the population change in america
+ plot(f) # does not follow a normal distribution we should do some transformations
+```
+
+## Correlation plot & Corelogram 
+
+```{r,eval=T,out.width="80%"}
+#install.packages("psych")
+#if (!requireNamespace("devtools")) install.packages("devtools") # if new to R run this line too, you will be able to obtain some packages created by the comunity 
+#devtools::install_github("caijun/ggcorrplot2") #cor plot package
+library(psych)
+library(ggcorrplot2)
+#get correlation test
+correlation.test <- psych::corr.test(mtcars[,c(1,3,5:7)],use = "pairwise",method = "spearman")
+my.correlation<-correlation.test$r # from the test get the correlation values
+p.values.correlation<-correlation.test$p # from the test get the correlation p values
+
+ggcorrplot.mixed(my.correlation, #values in a matrix format
+                 upper = "circle", #the upper part use circles
+                 lower = "number",  #the lower part with numbers
+                 p.mat = p.values.correlation, # use the pvalues
+                 insig = "label_sig",  #label the sig correlations
+                 sig.lvl = c(0.05, 0.01, 0.001)) #it will use * so we set the levels
+ggcorrplot(my.correlation, 
+                 method = "square", 
+                 type="lower",
+                 p.mat = p.values.correlation, 
+                 insig = "pch", #iuse a cross for the non sig correlations
+                  show.diag = F, #remove the diagonal correlations
+                 sig.lvl = c(0.05, 0.01, 0.001))
+
+
+```
+
+* we used the `ggcorrplot` or `ggcorrplot.mixed` to draw our correlation plot. 
+* Here, we added `p.mat= p.values.correlation` which had the correlation p values and set a significant level of 0.05; any value bigger than that it will be marked with a shape `pch`. We can remove the correlation by setting `insig="blank"`
