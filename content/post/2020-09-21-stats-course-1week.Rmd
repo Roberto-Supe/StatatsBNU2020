@@ -157,6 +157,7 @@ with `facet_*` we can separate the data and have different groups and many diffe
 
 ## Cumulative Distribution Function (CDF)
 
+the cumulative distribution function (CDF) of a real-valued random variable X, or just distribution function of X, evaluated at x, is the probability that X will take a value less than or equal to x.
 
 ```{r,out.width="50%",fig.show='hold'}
 ggplot(uspopchange,aes(x=Change))+
@@ -171,7 +172,9 @@ ggplot(uspopchange,aes(x=Change))+
 
 ## Correlation plot & Corelogram 
 
+
 Correlations are something we will need the majority of the time. They will help you to visualize the relationship between your variables. Yet, correlations are not the final answer to your hypothesis, many things in the natural world are correlated, therefore, you need to remember that **correlation is not causation**. 
+
 
 ```{r,eval=T,out.width="100%"}
 #install.packages("psych")
