@@ -20,6 +20,7 @@ R is one of the most complex and sofisticated statistical softwares. Similarly, 
 In these documents, we will provide you with the code required to replicate the main graphs given to you during the course. Additionally, the major parts and elements of the code have some explanations about the role and function so you can understand it better and follow it nicely. At the same time, you will be familiar with a program that is a great skill in the field of environmental science, programming, and statistics in general.
 
 ## Pareto Chart
+
 ```{r,message=FALSE}
 #install.packages(qcc) #run this to install a package that lets you create the graph
 x=c(4,5,8,7) #values
