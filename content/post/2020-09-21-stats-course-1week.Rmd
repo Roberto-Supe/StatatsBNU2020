@@ -1,6 +1,6 @@
 ---
 title: "Week 1: Introduction"
-author: ~
+author: Roberto Supe
 date: '2020-09-21'
 slug: stats-course-1week
 categories: ["R"]
