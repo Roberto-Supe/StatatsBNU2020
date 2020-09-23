@@ -1,7 +1,7 @@
 ---
 title: "Week 1: Introduction"
 author: Roberto Xavier Supe Tulcan
-date: '2020-09-21'
+date: '2020-09-23'
 slug: stats-course-1week
 categories: ["R"]
 tags: ["R Markdown", "plot", "regression"]
@@ -16,16 +16,17 @@ In these documents, we will provide you with the code required to replicate the 
 </div>
 <div id="pareto-chart" class="section level2">
 <h2>Pareto Chart</h2>
-<pre class="r"><code>#install.packages(qcc) #run this to install a package that lets you create the graph
+<pre class="r"><code>#install.packages(qcc) #run this to install a package that let&#39;s you create the graph
 x=c(4,5,8,7) #values
 names(x)=c(&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;) #groups
-#lets look how x data is looks like
+#let&#39;s look how x data is looks like
 x
 ## A B C D 
 ## 4 5 8 7</code></pre>
 <p>Here each value of x has a group name so we can plot <code>x</code> with <code>qcc::pareto.chart</code></p>
 <pre class="r"><code>library(qcc) # to use all the functions from that package run the library(package_name) once per session
-pareto.chart(x,ylab=&quot;Change (Million People)&quot;,ylab2=&quot;Cumulative Percentage&quot;)</code></pre>
+pareto.chart(x,ylab=&quot;Change (Million People)&quot;,
+             ylab2=&quot;Cumulative Percentage&quot;)</code></pre>
 <p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <pre><code>##    
 ## Pareto chart analysis for x
@@ -44,9 +45,9 @@ df #when you import a data set it will look like this
 ## 2    5         3.1     B
 ## 3    8         4.0     C
 ## 4    7         5.0     D
-#lets set the data the way needed for the plot with pareto.chart()
-x=df$temperature # take the info in a variable from the df data frame
-names(x)&lt;-df$group # get the values from the df data frame
+#let&#39;s set the data the way needed for the plot with pareto.chart()
+x=df$temperature # take the info in a variable from the df data frame to x
+names(x)&lt;-df$group # get the values from the df data frame to x
 pareto.chart(x) #plot the graph </code></pre>
 <p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <pre><code>##    
@@ -57,9 +58,31 @@ pareto.chart(x) #plot the graph </code></pre>
 ##   B   3.10000  12.10000   21.23288     82.87671
 ##   A   2.50000  14.60000   17.12329    100.00000</code></pre>
 </div>
-<div id="pareto-chart-with-ggplot2" class="section level2">
-<h2>Pareto Chart with ggplot2</h2>
-<p>There is no better package for graphs than ggplot2, many of the new functions, packages, and other programs in R aim to set a code compatible with ggplot2. Some packages have updated the old version to one that matches the syntax of ggplot2 like the following example.</p>
+<div id="the-grammar-of-graphics-ggplot2" class="section level2">
+<h2>The Grammar of Graphics: ggplot2</h2>
+<p>There is no better package for graphics than ggplot2, many of the new functions, packages, and other programs in R aim to build data results compatible with ggplot2 therefore, if you want to learn something in R this is the right package.</p>
+<div id="data-requirements-for-ggplot2-graphs" class="section level3">
+<h3>Data requirements for ggplot2 graphs</h3>
+<ul>
+<li>First, something important to mention is that all the data required for figures created with ggplot2 need to be inside a variable. If x is not already a data.frame, they will be converted to one by <code>fortify()</code>. This means that the program will join all the info in one data set.</li>
+</ul>
+<pre class="r"><code>#show the first 3 lines of the diamond data set
+head(diamonds,3)
+## # A tibble: 3 x 10
+##   carat cut     color clarity depth table price     x     y     z
+##   &lt;dbl&gt; &lt;ord&gt;   &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  0.23 Ideal   E     SI2      61.5    55   326  3.95  3.98  2.43
+## 2  0.21 Premium E     SI1      59.8    61   326  3.89  3.84  2.31
+## 3  0.23 Good    E     VS1      56.9    65   327  4.05  4.07  2.31</code></pre>
+<ul>
+<li>There is no right or wrong data style, we will learn to change the structure of data sets, filter, select, arrange your file in different ways.</li>
+<li>We will give you some tips that will make your future data files better for R-studio.</li>
+</ul>
+<p>Note:<em>you can get the data by using <code>ggplot_x_name$data</code></em></p>
+</div>
+<div id="pareto-chart-with-ggplot2" class="section level3">
+<h3>Pareto Chart with ggplot2</h3>
+<p>As aforementioned, some packages have updated the old version to one that matches the syntax of ggplot2 like the following example.</p>
 <pre class="r"><code>#install.packages(c(&quot;ggQC&quot;,&quot;gcookbook&quot;,&quot;tidyverse&quot;)) #the new qcc package for ggplot graphs
 library(ggQC)  
 library(gcookbook) # for the data set
@@ -67,15 +90,11 @@ library(ggplot2)
 data(&quot;uspopchange&quot;) # let&#39;s use the change in population in america as and example
 #uspopchange
 usa.pop&lt;-uspopchange[1:10,] # there are a lot of states so we can just take the first 10 states for the example data set
-# lets look at the data
-head(usa.pop)
-##        State Abb Region Change
-## 1    Alabama  AL  South    7.5
-## 2     Alaska  AK   West   13.3
-## 3    Arizona  AZ   West   24.6
-## 4   Arkansas  AR  South    9.1
-## 5 California  CA   West   10.0
-## 6   Colorado  CO   West   16.9</code></pre>
+# let&#39;s look at the first 2 rows of the data set
+head(usa.pop,2)
+##     State Abb Region Change
+## 1 Alabama  AL  South    7.5
+## 2  Alaska  AK   West   13.3</code></pre>
 <p>Now, the data is in a <code>data frame</code> style, we have a lot of variabels so we can do diferent graphs with different responce variables.</p>
 <pre class="r"><code>ggplot(usa.pop,aes(x=State,y=Change))+
   ggQC::stat_pareto(point.color = &quot;red&quot;, 
@@ -83,7 +102,7 @@ head(usa.pop)
                     line.color = &quot;black&quot;,
                     bars.fill = c(&quot;steelblue&quot;,&quot;tomato&quot;))+ #fill of the bars is continous therefore you need to set the first and last and you will get a gradient for all the bars 
   theme_bw() #remove the background colour and keep the major and minor axis and some other plot structures </code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>This clearly looks much better with more control over the elements. There are a few things that we can change to make them better like labels better axis, a legend because a double y axis can mislead the readers. In the following example, we will use all the data set as R is better at working with large data sets.</p>
 <pre class="r"><code>#install.packages(scales) # use the percent and other notation on the axis
 data(&quot;uspopchange&quot;)
@@ -104,7 +123,7 @@ p=ggplot(usa.pop,aes(x=State,y=Change))+
   labs(title=&quot;Pareto Chart&quot;,y=&quot;Population Change (million people)&quot;)+
   theme_bw(base_size = 13,base_family = &quot;serif&quot;) #sans= Arial, mono= Courier, serif= Times New Roman
 p</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <pre class="r"><code># This is nearly perfect yet the legend is not showing in our figure so we can add it ourselfs
 # first, we will need need to have a data set that can be used to add a legend to the figure
 legend.df=data.frame(x=1,y=130,label=&quot;Cumulative Change&quot;) #data frame required by ggplot2
@@ -114,7 +133,7 @@ legend.df=data.frame(x=1,y=130,label=&quot;Cumulative Change&quot;) #data frame 
              nudge_x = 0.2, #add some gap btw the point and the text along the x axis
              colour=&quot;black&quot;)+ #text colour
    annotate(&quot;rect&quot;,xmin=0.8,xmax=1.2,ymax=127,ymin=133,alpha=0.2) #build a box to avoid confusion</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
 <p>Here we clearly have full control of the elements of the plot. It may look like a lot of work now but once you get familiar with the sentence functions and elements it will be easier and of course, that will be very useful because many plots will use the same coding structure in the R universe. Now, despite it takes more than a few clicks to get our Pareto Chart in you added more knowledge like:</p>
 <ul>
 <li>Order data sets by different variables.</li>
@@ -127,12 +146,13 @@ legend.df=data.frame(x=1,y=130,label=&quot;Cumulative Change&quot;) #data frame 
 <li>Add points text rectagles to build special legends.</li>
 </ul>
 </div>
+</div>
 <div id="histograms" class="section level2">
 <h2>Histograms</h2>
 <p>Histograms help you to visualize the approximate distribution of your data. It is similar to the bar plot but we can change the number of <code>bins</code> that we want to display, depending on the number of observations we may need more or less. The default number of bins is 30, here, will do the job for large data sets, while small data sets can use a smaller <code>bins</code> to avoid gaphs. We will use <code>geom_histogram</code> and other parameters depending on your needs.</p>
 <pre class="r"><code>ggplot(diamonds,aes(x=price))+
   geom_histogram(bins = 45,fill=&quot;steelblue&quot;,colour=&quot;black&quot;)</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>We have other options like <code>binwidth</code> which defines the width of each bin to the selected value in units of x. In the example above we said to draw 45 bins and now we want as many bins as long each is 2 x units.</p>
 <pre class="r"><code>#install.packages(UsingR) # get the data set
 library(UsingR)
@@ -140,7 +160,7 @@ ggplot(father.son, aes(x = fheight*2.54)) +      # units transforamtion
   geom_histogram(aes(y = ..density..),fill=&quot;grey80&quot;,binwidth = 2) +  #bins each 2cm height
   geom_density()+ #density distribution on top of the histograms
   theme_light()</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="box-plots" class="section level2">
 <h2>Box plots</h2>
@@ -153,7 +173,7 @@ library(ggsci) #many colour palette
 ggplot(starwars, aes(x = gender, y = height)) +
   geom_boxplot(aes(fill=gender))+ # fill each boxplot by gender 
   scale_fill_aaas(alpha = 0.8) # add some transparency to the fill colour 0.2</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 <div id="qq-plot" class="section level2">
 <h2>QQ plot</h2>
@@ -173,8 +193,8 @@ ggplot(gapminder, aes(sample = lifeExp)) +
   geom_qq_line()+
   facet_wrap(.~continent,nrow = 2)+
   theme_test()</code></pre>
-<div class="figure"><span id="fig:unnamed-chunk-10"></span>
-<img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-10-1.png" alt="QQ plot for normally distributed data (left), not normally distributed (right)" width="50%" /><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-10-2.png" alt="QQ plot for normally distributed data (left), not normally distributed (right)" width="50%" />
+<div class="figure"><span id="fig:unnamed-chunk-11"></span>
+<img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-11-1.png" alt="QQ plot for normally distributed data (left), not normally distributed (right)" width="50%" /><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-11-2.png" alt="QQ plot for normally distributed data (left), not normally distributed (right)" width="50%" />
 <p class="caption">
 Figure 1: QQ plot for normally distributed data (left), not normally distributed (right)
 </p>
@@ -192,7 +212,7 @@ Figure 1: QQ plot for normally distributed data (left), not normally distributed
  b &lt;- density(runif(uspopchange$Change)) #need to transform the data to 
  f &lt;- CDF(b) # calculate the CDF of the population change in america
  plot(f) # does not follow a normal distribution we should do some transformations</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-11-1.png" width="50%" /><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-11-2.png" width="50%" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-12-1.png" width="50%" /><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-12-2.png" width="50%" /></p>
 </div>
 <div id="correlation-plot-corelogram" class="section level2">
 <h2>Correlation plot &amp; Corelogram</h2>
@@ -213,7 +233,7 @@ ggcorrplot.mixed(my.correlation, #values in a matrix format
                  p.mat = p.values.correlation, # use the pvalues stored in p.values.correlation
                  insig = &quot;label_sig&quot;,  #label the sig correlations
                  sig.lvl = c(0.05, 0.01, 0.001)) #it will use * so we set the levels</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-12-1.png" width="100%" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-13-1.png" width="100%" /></p>
 <pre class="r"><code>ggcorrplot(my.correlation, 
                  method = &quot;square&quot;, 
                  type=&quot;lower&quot;,
@@ -221,7 +241,7 @@ ggcorrplot.mixed(my.correlation, #values in a matrix format
                  insig = &quot;pch&quot;, #use a cross for the non sig correlations
                   show.diag = F, #remove the diagonal correlations
                  sig.lvl = c(0.05))</code></pre>
-<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-12-2.png" width="100%" /></p>
+<p><img src="/post/2020-09-21-stats-course-1week_files/figure-html/unnamed-chunk-13-2.png" width="100%" /></p>
 <ul>
 <li>Correlations are obtained by using <code>psych::corr.test()</code>. Here you will have a correlation and the p-value of each correlation</li>
 <li>There are a few options for the correlation plots: <code>ggcorrplot</code> or <code>ggcorrplot.mixed</code>.</li>
