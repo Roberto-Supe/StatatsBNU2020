@@ -1,7 +1,7 @@
 ---
 title: Getting Started
 author: Roberto Supe
-date: '2020-09-23'
+date: '2020-09-22'
 slug: getting-started
 categories:
   - R
@@ -12,7 +12,7 @@ tags:
 
 ## R studio
 
-First, we need to install two programs, [R](www.cran.rstudio.com) and [R studio](https://rstudio.com/products/rstudio/download/#download). You may be wondering the differences between R and R studio, we will no go in detail in this blog but I will mention that R studio is the Graphics Interface Device that makes R much easier for us. Install the versions recommended for your machine. 
+First, we need to install two programs, [R](www.cran.rstudio.com) and [R studio](https://rstudio.com/products/rstudio/download/#download). You may be wondering the differences between R and R studio, we will no go in detail in this blog but, I will mention that R studio is the Graphics Interface Device that makes R much easier for us. Install the versions recommended for your machine. 
 
 Once you finished the installation open R-studio and let's get started by installing the following packages.
 

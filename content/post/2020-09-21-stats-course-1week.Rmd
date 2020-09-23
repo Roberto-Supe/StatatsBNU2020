@@ -1,7 +1,7 @@
 ---
 title: "Week 1: Introduction"
 author: Roberto Xavier Supe Tulcan
-date: '2020-09-21'
+date: '2020-09-23'
 slug: stats-course-1week
 categories: ["R"]
 tags: ["R Markdown", "plot", "regression"]
@@ -22,10 +22,10 @@ In these documents, we will provide you with the code required to replicate the 
 ## Pareto Chart
 
 ```{r,message=FALSE}
-#install.packages(qcc) #run this to install a package that lets you create the graph
+#install.packages(qcc) #run this to install a package that let's you create the graph
 x=c(4,5,8,7) #values
 names(x)=c("A","B","C","D") #groups
-#lets look how x data is looks like
+#let's look how x data is looks like
 x
 ```
 
@@ -33,7 +33,8 @@ Here each value of x has a group name so we can plot `x` with `qcc::pareto.chart
 
 ```{r,message=FALSE}
 library(qcc) # to use all the functions from that package run the library(package_name) once per session
-pareto.chart(x,ylab="Change (Million People)",ylab2="Cumulative Percentage")
+pareto.chart(x,ylab="Change (Million People)",
+             ylab2="Cumulative Percentage")
 ```
 
 Usually, we work with a wide data set and you may want to do the plot for x variable then we can do the following:
@@ -43,16 +44,34 @@ df<-data.frame(rain=c(4,5,8,7), #values
                temperature=c(2.5,3.1,4,5),
 group=c("A","B","C","D")) #groups
 df #when you import a data set it will look like this
-#lets set the data the way needed for the plot with pareto.chart()
-x=df$temperature # take the info in a variable from the df data frame
-names(x)<-df$group # get the values from the df data frame
+#let's set the data the way needed for the plot with pareto.chart()
+x=df$temperature # take the info in a variable from the df data frame to x
+names(x)<-df$group # get the values from the df data frame to x
 pareto.chart(x) #plot the graph 
 ```
 
 
-## Pareto Chart with ggplot2 
+## The Grammar of Graphics: ggplot2 
 
-There is no better package for graphs than ggplot2, many of the new functions, packages, and other programs in R aim to set a code compatible with ggplot2. Some packages have updated the old version to one that matches the syntax of ggplot2 like the following example. 
+There is no better package for graphics than ggplot2, many of the new functions, packages, and other programs in R aim to build data results compatible with ggplot2 therefore, if you want to learn something in R this is the right package.  
+
+### Data requirements for ggplot2 graphs
+
+* First, something important to mention is that all the data required for figures created with ggplot2 need to be inside a variable. If x is not already a data.frame, they will be converted to one by `fortify()`. This means that the program will join all the info in one data set. 
+
+```{r}
+#show the first 3 lines of the diamond data set
+head(diamonds,3)
+```
+
+* There is no right or wrong data style, we will learn to change the structure of data sets, filter, select, arrange your file in different ways. 
+* We will give you some tips that will make your future data files better for R-studio.
+
+Note:*you can get the data by using `ggplot_x_name$data`* 
+
+### Pareto Chart with ggplot2
+
+As aforementioned, some packages have updated the old version to one that matches the syntax of ggplot2 like the following example.
 
 ```{r}
 #install.packages(c("ggQC","gcookbook","tidyverse")) #the new qcc package for ggplot graphs
@@ -62,8 +81,8 @@ library(ggplot2)
 data("uspopchange") # let's use the change in population in america as and example
 #uspopchange
 usa.pop<-uspopchange[1:10,] # there are a lot of states so we can just take the first 10 states for the example data set
-# lets look at the data
-head(usa.pop)
+# let's look at the first 2 rows of the data set
+head(usa.pop,2)
 ```
 
 Now, the data is in a `data frame` style, we have a lot of variabels so we can do diferent graphs with different responce variables.
@@ -121,6 +140,7 @@ Here we clearly have full control of the elements of the plot. It may look like 
 * Change the theme of plots.
 * Change the text font family, colour, and size.
 * Add points text rectagles to build special legends.
+
 
 ## Histograms
 
