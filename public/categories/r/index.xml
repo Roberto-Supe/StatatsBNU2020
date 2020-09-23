@@ -8,22 +8,22 @@
     <language>en-us</language>
     <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Getting Started</title>
-      <link>/2020/09/23/getting-started/</link>
+      <title>Week 1: Introduction</title>
+      <link>/2020/09/23/stats-course-1week/</link>
       <pubDate>Wed, 23 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>/2020/09/23/getting-started/</guid>
-      <description>R studioFirst, we need to install two programs, R and R studio. You may be wondering the differences between R and R studio, we will no go in detail in this blog but I will mention that R studio is the Graphics Interface Device that makes R much easier for us. Install the versions recommended for your machine.
-Once you finished the installation open R-studio and let’s get started by installing the following packages.</description>
+      <guid>/2020/09/23/stats-course-1week/</guid>
+      <description>Why RR is one of the most complex and sofisticated statistical softwares. Similarly, the current acceptance of the software is high in many fields and work lines. There is an infinite number of applications with R, you can have linear regressions, spatial analysis, graphs, books, journals, even APPs have been added in the last few years. Scientists are constantly updating the program and other packages for us to find it easier to interact with it.</description>
     </item>
     
     <item>
-      <title>Week 1: Introduction</title>
-      <link>/2020/09/21/stats-course-1week/</link>
-      <pubDate>Mon, 21 Sep 2020 00:00:00 +0000</pubDate>
+      <title>Getting Started</title>
+      <link>/2020/09/22/getting-started/</link>
+      <pubDate>Tue, 22 Sep 2020 00:00:00 +0000</pubDate>
       
-      <guid>/2020/09/21/stats-course-1week/</guid>
-      <description>Why RR is one of the most complex and sofisticated statistical softwares. Similarly, the current acceptance of the software is high in many fields and work lines. There is an infinite number of applications with R, you can have linear regressions, spatial analysis, graphs, books, journals, even APPs have been added in the last few years. Scientists are constantly updating the program and other packages for us to find it easier to interact with it.</description>
+      <guid>/2020/09/22/getting-started/</guid>
+      <description>R studioFirst, we need to install two programs, R and R studio. You may be wondering the differences between R and R studio, we will no go in detail in this blog but, I will mention that R studio is the Graphics Interface Device that makes R much easier for us. Install the versions recommended for your machine.
+Once you finished the installation open R-studio and let’s get started by installing the following packages.</description>
     </item>
     
   </channel>

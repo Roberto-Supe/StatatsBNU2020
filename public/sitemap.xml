@@ -13,11 +13,6 @@
   </url>
   
   <url>
-    <loc>/2020/09/23/getting-started/</loc>
-    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/plot/</loc>
     <lastmod>2020-09-23T00:00:00+00:00</lastmod>
   </url>
@@ -33,7 +28,12 @@
   </url>
   
   <url>
-    <loc>/tags/read.csv/</loc>
+    <loc>/tags/r-markdown/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/regression/</loc>
     <lastmod>2020-09-23T00:00:00+00:00</lastmod>
   </url>
   
@@ -43,23 +43,23 @@
   </url>
   
   <url>
+    <loc>/2020/09/23/stats-course-1week/</loc>
+    <lastmod>2020-09-23T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/2020/09/22/getting-started/</loc>
+    <lastmod>2020-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/read.csv/</loc>
+    <lastmod>2020-09-22T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/about/</loc>
     <lastmod>2020-09-20T21:48:51-07:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r-markdown/</loc>
-    <lastmod>2020-09-21T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/regression/</loc>
-    <lastmod>2020-09-21T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/2020/09/21/stats-course-1week/</loc>
-    <lastmod>2020-09-21T00:00:00+00:00</lastmod>
   </url>
   
 </urlset>

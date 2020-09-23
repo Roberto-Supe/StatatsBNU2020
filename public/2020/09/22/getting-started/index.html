@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+<title>Getting Started - BNU-Statistics with R</title>
+<meta property="og:title" content="Getting Started - BNU-Statistics with R">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.jpg"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/Roberto-Supe">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">4 min read</span>
+    
+
+    <h1 class="article-title">Getting Started</h1>
+
+    
+    <span class="article-date">2020-09-22</span>
+    
+
+    <div class="article-content">
+      
+
+
+<div id="r-studio" class="section level2">
+<h2>R studio</h2>
+<p>First, we need to install two programs, <a href="www.cran.rstudio.com">R</a> and <a href="https://rstudio.com/products/rstudio/download/#download">R studio</a>. You may be wondering the differences between R and R studio, we will no go in detail in this blog but, I will mention that R studio is the Graphics Interface Device that makes R much easier for us. Install the versions recommended for your machine.</p>
+<p>Once you finished the installation open R-studio and let’s get started by installing the following packages.</p>
+<pre class="r"><code>#to install a package then you need to know the name of the package and run the following code
+install.packages(&quot;tidyverse&quot;) #ctrl+ enter to run a line
+install.packages(c(&quot;gapminder&quot;,&quot;ggpubr&quot;,&quot;ggsci&quot;.&quot;plotrix&quot;,&quot;plyr&quot;,&quot;gcookbook&quot;)) #multiple packages in one line</code></pre>
+<p>We load the packages every time that we open a new R session.</p>
+<pre class="r"><code>#load them
+library(ggplot2)
+library(tidyverse)
+library(gcookbook)
+library(gapminder)
+library(ggpubr)
+library(ggsci)
+library(plyr)
+library(plotrix)</code></pre>
+</div>
+<div id="reading-files" class="section level2">
+<h2>Reading files</h2>
+<p>There are several options to read a file containing your data not only numerical as R can read text, book pages, among others for different analysis. Similarly, your data does not need to be in an excel file, you are able to import a lot of formats as long as you are using the right package. Similarly, it can be directly obtained from other online data sources.</p>
+<p>Most of the time, we will use the classic <code>csv</code>,<code>txt</code>, and <code>xlxs</code> files. Let’s begin by selecting a file that we want. Several files for online sources or the output of programs are in comma separated format (CSV), to ensure that they can be open in different places, therefore it is common and advised that you save your files in that format so others can easily read them. Run the next line of code and select any <code>csv</code> file that you got on the computer.</p>
+<pre class="r"><code>df&lt;-read.csv(file.choose(),skip = 0,header = T)
+df
+df&lt;-read.csv(&quot;file.csv&quot;/&quot;file.txt&quot;) #read a file by using the name of the file </code></pre>
+<p>We added the argument <code>skip</code> to indicate two points: first, each function in R has several arguments, some are by default like <code>skip=0</code> or <code>header=T</code> meaning that you do not need to add them to obtain the results. Second, we can add indicators that will do the action that we want, for example, files may contain 4 lines of text at the beginning therefore, <code>skip=4</code> will not read the file until the 5th line, similarly, <code>header=F</code> is used for files with no column names.</p>
+<blockquote>
+<p>R-Studio requires you to have something well structured because you will have some documents that you may need to open them after a long time. If you select file.choose it is easy to forget which file you were working with. Therefore, when you got some data and you are ready to work with something have one folder for all the information and create File -&gt; <strong>New Project</strong>. You will save, store, share to anyone and they will be able to run the same things you did.</p>
+</blockquote>
+<p>We may want to read files from excel, here we may find different pages. If you got a large file and you don’t want to create one <code>csv</code> file for each page then you can use the package <code>readxl</code> and call the <code>read_excel</code> function to do something like this.</p>
+<pre class="r"><code>#install.packages(&quot;readxl&quot;)
+library(readxl)
+data &lt;- read_excel(&quot;datafile.xls&quot;, sheet = 2) #page number
+data &lt;- read_excel(&quot;datafile.xls&quot;, sheet = &quot;Revenues&quot;) #name of the page</code></pre>
+<p>We can also copy to our clipboard some data and save it as a data frame. The package <code>clipr</code> has a function to directly convert the selection into a tibble.</p>
+<ul>
+<li>Open an excel file so we can copy the data for this exercise and copy the data that you one to use</li>
+</ul>
+<pre class="r"><code>#only available for windows
+data.selected&lt;-read.csv(&quot;clipboard&quot;,header = F,sep = &quot;\t&quot;)
+
+#install.packages(&quot;clipr&quot;)
+library(clipr)
+data&lt;- read_clip_tbl() #read from the clipboard directly</code></pre>
+<p>As you can see there are many ways to import data. The manual option will be to use the <code>Import Dataset</code> button in the environmnet window which will take your file in the same way as <code>file.choose()</code>. Now, we got the file ready for analysis and interpretation.</p>
+<blockquote>
+<p>R and its packages have a lot of built-in data for our use and practice. Use the command <strong>data()</strong> to get the names of the data sets that you can use.</p>
+</blockquote>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
