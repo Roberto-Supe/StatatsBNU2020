@@ -25,13 +25,34 @@ In these documents, we will provide you with the code required to replicate the 
 #install.packages(qcc) #run this to install a package that lets you create the graph
 x=c(4,5,8,7) #values
 names(x)=c("A","B","C","D") #groups
+#lets look how x data is looks like
+x
+```
+
+Here each value of x has a group name so we can plot `x` with `qcc::pareto.chart`
+
+```{r,message=FALSE}
 library(qcc) # to use all the functions from that package run the library(package_name) once per session
 pareto.chart(x,ylab="Change (Million People)",ylab2="Cumulative Percentage")
 ```
 
+Usually, we work with a wide data set and you may want to do the plot for x variable then we can do the following:
+
+```{r}
+df<-data.frame(rain=c(4,5,8,7), #values
+               temperature=c(2.5,3.1,4,5),
+group=c("A","B","C","D")) #groups
+df #when you import a data set it will look like this
+#lets set the data the way needed for the plot with pareto.chart()
+x=df$temperature # take the info in a variable from the df data frame
+names(x)<-df$group # get the values from the df data frame
+pareto.chart(x) #plot the graph 
+```
+
+
 ## Pareto Chart with ggplot2 
 
-There is no better package for graphs than ggplot2, many of the new functions, packages, and other programs in R aim to set a code compatible with ggplot2. Some packages have updated the old version to one that matches the syntax of ggplot2 like the following example.
+There is no better package for graphs than ggplot2, many of the new functions, packages, and other programs in R aim to set a code compatible with ggplot2. Some packages have updated the old version to one that matches the syntax of ggplot2 like the following example. 
 
 ```{r}
 #install.packages(c("ggQC","gcookbook","tidyverse")) #the new qcc package for ggplot graphs
@@ -41,6 +62,13 @@ library(ggplot2)
 data("uspopchange") # let's use the change in population in america as and example
 #uspopchange
 usa.pop<-uspopchange[1:10,] # there are a lot of states so we can just take the first 10 states for the example data set
+# lets look at the data
+head(usa.pop)
+```
+
+Now, the data is in a `data frame` style, we have a lot of variabels so we can do diferent graphs with different responce variables.
+
+```{r}
 ggplot(usa.pop,aes(x=State,y=Change))+
   ggQC::stat_pareto(point.color = "red", 
                     point.size = 3, 
