@@ -1,5 +1,5 @@
 ---
-title: "Week 2 Regression and Fitting Models"
+title: "Week 2: Model Fitting with Linear Regression"
 author: Roberto Supe
 date: '2020-09-30'
 slug: week-2-regression-and-fitting-models
@@ -196,18 +196,7 @@ ggplot(df,mapping = aes(x=temperature,y=bacterias))+
 
 * There is no clear linearity but you can see that data is showing a slightly decreasing trend.
 
-## Assumptions one and two 
-
-Something that will save us time is using `chart.Correlation` with this function we get the histograms, scatter plots, correlations, and the significance of those correlations. Although this does not test the normal distribution you can observe with histograms the distribution of your data for all your numeric variables. 
-
-```{r}
-#library(PerformanceAnalytics)
-chart.Correlation(df[,-5], #numeric data set
-                  histogram = T, #True show histograms
-                  method = "pearson") #correlation method "pearson", "kendall", "spearman"
-```
-
-> Now that all the variables are normally distributed and there is a linear relationship we can use them in our regression. 
+* Now that all the variables are normally distributed and there is a linear relationship we can use them in our regression. 
 
 *Null hypothesis (H0):* There is no change in bacteria population with temperature, radiation,etc.
 
@@ -247,7 +236,7 @@ par(mfrow=c(1,1)) #we set them back to normal
 
 Here we can see that the residual errors are constant across the groups and distributed evenly. Look at the `Normal Q-Q` (top right) which under homoscedasticity it should show the points along the line.
 
-* This will conclude a simple linear regression model
+* This will conclude a simple linear regression model and its analysis.
 
 ## Extra Notes
 
