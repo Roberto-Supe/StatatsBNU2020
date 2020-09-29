@@ -1,3 +1,17 @@
+---
+title: "Week 2 Regression and Fitting Models"
+author: Roberto Supe
+date: '2020-09-30'
+slug: week-2-regression-and-fitting-models
+categories:
+  - R
+tags:
+  - regression
+  - r
+  - blog
+  - statistics
+---
+
 
 
 <p>This week we will cover data summaries, data structure, linear regression and its assumptions.</p>
@@ -75,7 +89,7 @@ tail(storms,4) #show me the last 4 observations </code></pre>
 <pre class="r"><code># we will begin by ploting the variables of our hypothesis
 ggplot(storms,mapping = aes(x=wind,y=pressure))+
   geom_point()</code></pre>
-<p><img src="2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <p>Looks like there is some sort of relationship, negative relationship, between our variables of interest. However, we need statistical models to determine the changes in pressure with wing and how significant are those changes.</p>
 </div>
 <div id="least-squares-linear-regression" class="section level1">
