@@ -1,0 +1,354 @@
+---
+title: Week 2 Regression and Fitting Models
+author: Roberto Supe
+date: '2020-09-30'
+slug: week-2-regression-and-fitting-models
+categories:
+  - R
+tags:
+  - regression
+  - r
+  - blog
+  - statistics
+---
+
+This week we will cover data summaries, data structure, linear regression and multiple regression and their assumptions.
+
+At the begining of each session we will need to load our libraries, so let's load the packages for this week
+
+```{r,message=FALSE}
+library(tidyverse)
+library(plotrix)
+library(ggpubr) #install.packages("ggpubr")
+library(qqplotr) #install.packages("qqplotr")
+library(PerformanceAnalytics)#install.packages("PerformanceAnalytics")
+library(gcookbook)
+```
+
+
+# Sample Statistics and Summary results 
+
+Mean, variance and standard error are allways required for the final report. It can take a while to sort the data in the right way and several times you may want to check how your data looks frequently. `Tydiverse` is a complex group of packages which unclude `ggplot2` and `dplyr`. Addiding, changing, combining, removing is simple with `dplyr`.
+
+```{r}
+data("storms")
+head(storms) #look at the first 6 rows
+mean(storms$wind) # mean wind speed of all the recored storms
+sd(storms$pressure) # pressure standard deviation of all the recored storms
+plotrix::std.error(storms$ts_diameter) # standard error of storm eye diameter 
+
+```
+
+I am sure that you are familiar with that as it is something we can get from any statistical program, now, let's look how to deal with more information and different results.
+
+```{r}
+#library(tidyverse)
+storms[,c(1,2,10,11)]%>% #dataset and variables we will work with [row,column] use c(for selecting multiple columns)
+  dplyr::group_by(name,year)%>% #group by name and year
+  dplyr::summarise_all(funs(mean(.,na.rm = T), #use funs( to get multiple stimators)
+                           sd(.),
+                           var(.), #sd^2
+                           plotrix::std.error(.),
+                           observations=length(.))) # we can name the variables directly  length tells you how many observations in each group
+```
+
+* **group_by** is one of the best elements of dplyr, it works by making one data set for all the information you add in group_by(). Here, we group all the storms with the same name, if there are multiple elements then we group them again by year. In the output you will see there is 'Groups: name [198]` this means that there are 198 names, some with multiple years so we get a data set with 426 rows.
+* **summarise_all** means that all the functions will be apply to all the variables excluded from `group_by`.
+* **.** and **na.rm**: the `.` means take all the information as it is no changes. `na.rm=T` means TRUE (yes) to remove missing values if there are some 
+
+You want to know if there is a relationship between wind and pressure so we need to visuallize both variables in a scatter plot. 
+
+```{r}
+data("storms") #we will work with the dataset: Carbon Dioxide Uptake in Grass Plants
+tail(storms,4) #show me the last 4 observations 
+# we will begin by ploting the variables of our hypothesis
+ggplot(storms,mapping = aes(x=wind,y=pressure))+
+  geom_point()
+```
+
+Looks like there is some sort of relationships, negative relationship, between our variables of interest. However, we need statistical models to determine the changes in presserue with wing and how significant are those changes.
+
+# Least squares Linear Regression:
+
+Least squares method also deffined as the *line of best fit* aims to produce a model which reduces the *variation *or *error* between the expected and predicted values. Next we will run a simple linear regression with `lm` with our two variables to understand this concept and the estimation of model parameters which are often called **ordinary least squares estimates**. The previous scatter looked roughly linear, so let's examine their relationship.
+
+```{r}
+fit.lm<-lm(pressure~wind, data = storms) # y~x makes sure to use this `~`
+```
+
+Equation for the LSLR: 1029.66 - 0.7015x
+
+We can also add the error term by using `sigma`
+
+```{r}
+sigma(fit.lm) # residual standard deviation E
+confint(fit.lm) # get confidence intervals for all the terms
+```
+
+Therfore the equation for the LSLR with the CI at 95% confidence level will be: 1029.66 - 0.7015x ,phantom(.)%+-%phantom(.), &#177 6.537. 
+
+## Confidence Intervals (CI)
+
+They are values which also represent the accuracy of our sample mean. This will show a range of plausible values not only for the mean but for any unknown parameter.   
+
+```{r}
+labels<-data.frame(label=c("99%","95%","90%","90%","95%","99%"),
+          x=c(-2.326348,-1.644854,-1.281552,1.281552,1.644854,2.326348),
+          y=c(0.03,0.105,0.18,0.18,0.105,0.03))
+ggplot(NULL, aes(x = c(-4, 4))) +
+  stat_function(fun = dnorm,
+    geom = "area",fill = "grey10",alpha = .3) +
+  geom_vline(xintercept =0,colour="black",linetype="dotted")+
+  stat_function(fun = dnorm,
+    geom = "area",fill = "steelblue",
+    xlim = c(-qnorm(.90), -4))+
+  stat_function(fun = dnorm,geom = "area",fill = "steelblue",xlim = c(qnorm(.90), 4))+
+  stat_function(fun = dnorm,geom = "area",fill = "tomato",xlim = c(qnorm(.95), 4))+
+  stat_function(fun = dnorm,geom = "area",fill = "tomato",xlim = c(-qnorm(.95), -4))+
+  stat_function(fun = dnorm,geom = "area",fill = "forestgreen",xlim = c(qnorm(.99), 4))+
+  stat_function(fun = dnorm,geom = "area",fill = "forestgreen",xlim = c(-qnorm(.99), -4))+
+  ggrepel::geom_text_repel(data=labels,mapping = aes(x=x,y=y,label=label),nudge_y = 0.1)+
+  annotate("text",x=-3.5,y=0.3,label=paste0("N(","\u03BC",",","\u03C3","\u00B2", ")"),size=6,fontface = 'italic')+
+  labs(title = "Normal Distribution",x ="",y = "f(x)") +
+  scale_x_continuous(breaks = c(-2.326348,-1.644854,-1.281552,0,1.281552,1.644854,2.326348),
+                     labels = c(paste0("\u03BC",c(-3,-2,-1),"\u03C3"),"\u03BC",paste0("\u03BC","\u002B",c(1,2,3),"\u03C3")))+
+  scale_y_continuous(expand = c(0.0,0.0))+
+  theme_bw()+
+  theme(panel.grid = element_blank(),
+        axis.text.x = element_text(colour="black"),
+        axis.text.y =element_blank(),
+        axis.ticks.y = element_blank())
+
+```
+
+As we increase our condifence interval we are more likely to include the true value of the parameter.
+
+## Coefficient of determination
+
+In our regression model the coefficient of determination is calculated by diving the quotient of the variances of the fitted values and observed values of the dependent variable. This tells us **how much of the variation of y is explain by the model** or how well the model fits the data. It is important that you look at the adjusted R-square when fitting a multiple regression because it deals with any noise created by adding more variables. 
+
+```{r}
+results=base::summary(fit.lm) #save all the summary in a large summary
+results$r.squared #take the coefficient of determination
+```
+
+The model explains 88.78% of the variation in  pressure by wind data.
+
+# Simple Linear Regression
+
+The regression model was done and we needed to know how significant are those results. However, before we begin, it is important that you check the data before regression and any other model that you run. By this, it is ment that we should determine something like the normality of the data. There are multiple tests and if not normally distributed,  we will need to transform the data. 
+
+## Assumption One (Normality)
+
+Use `shapiro.test` to carry out the normality test, here, the H0 is that data is normally distributed. P-Values >0.05 will support this normal distribution of your variable. 
+
+```{r,eval=FALSE}
+#library(gcookbook) #data set
+library(gcookbook)
+data("heightweight")
+shapiro.test(heightweight$heightIn) # normality test passed
+shapiro.test(iris$Sepal.Length) # normality test failed
+shapiro.test(log(iris$Sepal.Length)) # normality test with transformed data passed
+
+```
+
+lrearly, we can make more sence of the data when we plot it. This will be useful when you got a lot of variables.
+
+```{r, out.width="50%",fig.show='hold'}
+# not transformed data
+ggplot(data=iris,mapping = aes(sample=Sepal.Length))+
+  geom_qq()+
+  geom_qq_line()+
+  theme_bw()
+#transformed data with an alternative package to ggplot2
+ggpubr::ggqqplot(log(iris$Sepal.Length)) # set the variable that you want to get the qqplot
+```
+
+* Data transformation resulted in a better qq plot. Now we can see why it passed `shapiro.test`.
+
+* We used two options, one plot with the normal ggplot2 and the second one with the package `ggpubr`. The last is a package that reduces ggplot2 lines of code and gives you great results. If you work with small data sets and you want to have good graphs it is a great option. We will cover more about this package in a few weeks.
+
+Let's build a data set for our regressions 
+
+```{r, out.width="50%",fig.show='hold'}
+#library(qqplotr)
+set.seed(15)
+df<-data.frame(temperature=rnorm(100,mean = 25,sd=8),
+               wind=rnorm(100,mean = 10,sd=1.2),
+               radiation=rnorm(100,mean = 5000,sd=1000),
+               bacterias=rnorm(100,mean = 50,sd=24.22),
+               groups=c("Day","Night"))
+head(df)
+shapiro.test(df$radiation) # normal distribution
+shapiro.test(df$wind) # normal distribution
+shapiro.test(df$temperature) #normal distribution
+```
+
+## Assumption 2 (Lineariy)
+
+The relationship between the independent and dependent variable must be linear. Scatter plot is our alternative to test if there is a linear distribution which would show our points is something like a straight line.
+
+```{r}
+ggplot(df,mapping = aes(x=temperature,y=bacterias))+
+  geom_point()
+```
+
+Something that will save us time is `chart.Correlation` with this function we get the histograms, scatter plots, correlations and the significance of those correlations. 
+
+```{r}
+#library(PerformanceAnalytics)
+chart.Correlation(df[,-5], #numeric data set
+                  histogram = T, #True show histograms
+                  method = "pearson") #correlation method "pearson", "kendall", "spearman"
+```
+
+Now that all the variables are normally distributed and there is linear relationship we can use them in our regression regression. 
+
+*Null hypothesis (H0):* There is no change in bacteria population with temperature,radiation,etc.
+*Alternative hypothesis (H1):* Bacteria population changes with temperature,radiation,etc.
+
+```{r,}
+fit.lm<- lm(bacterias~temperature,data=df)
+summary(fit.lm)
+```
+
+We can see that bacteria population did not change with temperature (P-value>0.05). Let's see how radiation affects bacteria population
+
+```{r,}
+fit.lm<- lm(bacterias~radiation,data=df)
+summary(fit.lm)
+```
+
+We got similar results so we would conclude that we are 95% confident that radiation and temperature alone do not affect the population of bacterias. 95% confident because we run our model at this CI.
+
+## Model test assumption  (Homoscedasticity)
+
+We should ensure that the model fited meets this last assumption, same variance over the range of prediciton, to maintain the model. This means that the error term needs to be the same across all values of the independent variables. The fitted model already has all the imformation that we need for the plots so we will just call plot(model). 
+
+```{r}
+par(mfrow=c(2,2)) #plot panel to fit 2 by 2 pictures
+plot(fit.lm) # lm result has 4 figures
+par(mfrow=c(1,1)) #we set them back to normal
+```
+
+Here we can see that the resudial erros are constant across the groups and distributed evenly. Look at the `Normal Q-Q` (top right) which under homoscedasticity it should show the points along the line.
+
+* This will conclude a simple linear regression model
+
+> When we got a lot of variables, We can do the test in one line of code with **lappy**. Additionally, when you run multiple variables the resulting object is a list (results of the first, results of the second, results of the n) to observe and export all those values or use them in other parts of your documents then we need to unlist and save them in a data frame. 
+
+## Extra Notes 
+### Run the same test for each variables
+
+```{r}
+results<-data.frame(do.call(rbind,lapply(df[,1:3],function(x) shapiro.test(x)[c("statistic","p.value")])))
+results # how the data looks like
+```
+
+Let's take each element and extract just what we need.
+
+```{r}
+results$statistic<-unlist(results$statistic) # remove any text left,the list structure and make it a new vector
+results$p.value<-unlist(results$p.value) #remove the list structure and make it a new vector
+str(results)
+```
+
+There is no one option and you can also do something like this
+
+```{r}
+#option 2
+allshapiro.tes<-lapply(df[,1:3],shapiro.test) #as a list apply the function shapiro.test to the variables [,1:3] in the data frame df
+allshapiro.tes # how the data looks like for all the variables
+results<-data.frame(t(sapply(allshapiro.tes,`[`,c("statistic","p.value")))) #let's take what we really need 
+results$statistic<-unlist(results$statistic) # remove any text left,the list structure and make it a new vector
+results$p.value<-unlist(results$p.value) #remove the list structure and make it a new vector
+str(results)
+```
+
+## Correlations, histograms and scatters plot modifications
+
+Here there is a function to get the variable correlations, histograms and scatter plot with text over the histograms.
+
+```{r}
+
+panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...) {
+  usr <- par("usr")
+  on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r <- abs(cor(x, y, use = "complete.obs",method = "pearson"))
+  txt <- format(c(r, 0.123456789), digits = digits)[1]
+  txt <- paste(prefix, txt, sep = "")
+  if (missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
+  text(0.5, 0.5, txt, cex =  cex.cor * (1 + r) / 2)
+}
+
+panel.hist <- function(x, ...) {
+  usr <- par("usr")
+  on.exit(par(usr))
+  par(usr = c(usr[1:2], 0, 1.5) )
+  h <- hist(x, plot = FALSE)
+  breaks <- h$breaks
+  nB <- length(breaks)
+  y <- h$counts
+  y <- y/max(y)
+  rect(breaks[-nB], 0, breaks[-1], y, col = "white", ...)
+}
+
+df %>% # your data frame
+  dplyr::select(-groups) %>% #remove categorical variables names or numbers if multiple -c()
+  pairs(
+    upper.panel = panel.cor,
+    diag.panel  = panel.hist,
+    lower.panel = panel.smooth
+  )
+
+```
+
+## Alternative qqplots
+
+`ggpurb` adds a confidence region with the qqplot, we can do that with ggplot2 and the package `qqplotr`
+
+```{r, out.width="50%",fig.show='hold',error=FALSE}
+library(qqplotr) #install.packages("qqplotr")
+ggplot(data=airquality,mapping = aes(sample=Ozone))+
+  geom_qq()+
+  geom_qq_line()+
+  facet_wrap(.~Month,scales = "free")+
+  theme_bw()
+ggplot(data=airquality,mapping = aes(sample=Ozone))+
+  #geom_qq()+
+  stat_qq_band()+
+  stat_qq_line()+
+  stat_qq_point()+
+  facet_wrap(.~Month,scales = "free")+
+  theme_bw()
+#values should be inside that grey shadow 
+```
+
+
+## Rearange multiple variables for ggplot
+
+To use ggplot2 in a more advance level you need to set a long data format. This means that all your response variables need to be in rows and the grouping in a different variable.
+Let's use the iris dataset once again.
+
+```{r,fig.show='hold',out.width="50%"}
+head(iris)
+iris.long<-tidyr::gather(data=iris,key="Response_variable",value="observation_value",1:4) #the numbers represent the columns that you want to make rows. 
+# lets bring the code from the first graph and change the variables and the data set
+ggplot(data=iris.long,mapping = aes(sample=observation_value))+
+  geom_qq()+
+  geom_qq_line()+
+  facet_grid(Response_variable~Species,scales = "free")+ #y~x
+  theme_bw()
+
+# we got two options for the facets grid and wrap so let's try facet_wrap to see the differences
+ggplot(data=iris.long,mapping = aes(sample=observation_value))+
+  geom_qq()+
+  geom_qq_line()+
+  facet_wrap(Response_variable~Species,scales = "free")+ #y~x
+  theme_bw()
+```
+
+That is a great and fast way to see distributions and you can many plots at once.
+
+
