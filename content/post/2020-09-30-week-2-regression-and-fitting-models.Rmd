@@ -55,7 +55,7 @@ storms[,c(1,2,10,11)]%>% #dataset and variables we will work with [row,column] u
 
 * **group_by** is one of the best elements of dplyr, it works by making one data set for all the information you add in group_by(). Here, we group all the storms with the same name, if there are multiple elements then we group them again by year. In the output you will see there is 'Groups: name [198]` this means that there are 198 names, some with multiple years so we get a data set with 426 rows.
 * **summarise_all** means that all the functions will be applied to all the variables excluded from `group_by`.
-*  **na.rm** and **.**: The `.` means take all the information as it is no changes. `na.rm=T` means TRUE (yes) to remove missing values if there are some 
+*  **na.rm** and **'.'**: The `.` means take all the information as it is no changes. `na.rm=T` means TRUE (yes) to remove missing values if there are some 
 
 You want to know if there is a relationship between wind and pressure so we need to visualize both variables in a scatter plot. 
 
@@ -87,7 +87,7 @@ sigma(fit.lm) # residual standard deviation E
 confint(fit.lm) # get confidence intervals for all the terms
 ```
 
-Therefore, the equation for the LSLR with a CI of 95% confidence level will be: 1029.66 - 0.7015x \u00B1 6.537. 
+Therefore, the equation for the LSLR with a CI of 95% confidence level will be: 1029.66 - 0.7015x $\pm$ 6.537. 
 
 ## Confidence Intervals (CI)
 
