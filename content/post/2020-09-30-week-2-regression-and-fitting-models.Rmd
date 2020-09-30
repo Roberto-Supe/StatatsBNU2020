@@ -31,18 +31,30 @@ library(tidyr) #install.packages("tidyr")
 
 Mean, variance, and error values are always required for the final report. It can take a while to sort the data in the right way and several times you may want to check how your data looks frequently. `Tydiverse` is a complex group of packages that include `ggplot2` and `dplyr`. Adding, changing, combining, removing is simple with `dplyr`.
 
-```{r}
+```{r,collapse = TRUE}
 data("storms")
 head(storms) #look at the first 6 rows
+```
+
+
+```{r,collapse = TRUE}
 mean(storms$wind) # mean wind speed of all the recored storms
+```
+
+
+```{r,collapse = TRUE}
 sd(storms$pressure) # pressure standard deviation of all the recored storms
+```
+
+
+```{r,collapse = TRUE}
 plotrix::std.error(storms$ts_diameter) # standard error of storm eye diameter 
 
 ```
 
 I am sure that you are familiar with that as it is something we can get from any statistical program, now, let's look at how to deal with more information and different results.
 
-```{r,warning=F}
+```{r,warning=F,collapse = TRUE}
 #library(tidyverse)
 storms[,c(1,2,10,11)]%>% #dataset and variables we will work with [row,column] use c(for selecting multiple columns)
   dplyr::group_by(name,year)%>% #group by name and year
@@ -59,10 +71,14 @@ storms[,c(1,2,10,11)]%>% #dataset and variables we will work with [row,column] u
 
 You want to know if there is a relationship between wind and pressure so we need to visualize both variables in a scatter plot. 
 
-```{r}
+```{r,collapse = TRUE}
 data("storms") #we will work with the dataset: Carbon Dioxide Uptake in Grass Plants
 tail(storms,4) #show me the last 4 observations 
 # we will begin by ploting the variables of our hypothesis
+```
+
+
+```{r,collapse = TRUE}
 ggplot(storms,mapping = aes(x=wind,y=pressure))+
   geom_point()
 ```
@@ -73,7 +89,7 @@ Looks like there is some sort of relationship, negative relationship, between ou
 
 The least squares method also deffined as the *line of best fit* aims to produce a model that reduces the *variation *or *error* between the expected and predicted values. Next, we will run a simple linear regression with `lm` with our two variables to understand this concept and the estimation of model parameters which are often called **ordinary least squares estimates**. The previous scatter looked roughly linear, so let's examine their relationship.
 
-```{r}
+```{r,collapse = TRUE}
 fit.lm<-lm(pressure~wind, data = storms) # y~x makes sure to use this `~`
 fit.lm #information inside fit.lm
 ```
@@ -82,8 +98,12 @@ Equation for the LSLR: 1029.66 - 0.7015x
 
 We can also add the error term by using `sigma`
 
-```{r}
+```{r,collapse = TRUE}
 sigma(fit.lm) # residual standard deviation E
+```
+
+
+```{r,collapse = TRUE}
 confint(fit.lm) # get confidence intervals for all the terms
 ```
 
@@ -129,7 +149,7 @@ As we increase our confidence interval we are more likely to include the true va
 
 In our regression model, the coefficient of determination is calculated by diving the quotient of the variances of the fitted values and observed values of the dependent variable. This tells us **how much of the variation of y is explain by the model** or how well the model fits the data. It is important that you look at the adjusted R-square when fitting a multiple regression because it deals with any noise created by adding more variables. 
 
-```{r}
+```{r,collapse = TRUE}
 results=base::summary(fit.lm) #save all the summary in a large summary
 results$r.squared #take the coefficient of determination
 ```
@@ -144,13 +164,23 @@ The regression model was done and we needed to know how significant those result
 
 Use `shapiro.test` to carry out the normality test, here, the H0 is that data is normally distributed. P-Values >0.05 will support this normal distribution of your variable. 
 
-```{r,eval=T}
+```{r,eval=T,collapse = TRUE}
 #library(gcookbook) #data set
 library(gcookbook)
 data("heightweight")
 shapiro.test(heightweight$heightIn) # normality test passed
-shapiro.test(iris$Sepal.Length) # normality test failed
-shapiro.test(log(iris$Sepal.Length)) # normality test with transformed data passed
+```
+
+
+```{r,eval=T,collapse = TRUE}
+# normality test failed
+shapiro.test(iris$Sepal.Length) 
+```
+
+
+```{r,eval=T,collapse = TRUE}
+# normality test with transformed data passed
+shapiro.test(log(iris$Sepal.Length))
 ```
 
 Clearly, we can make more sense of the data when we plot it. This will be useful when you got a lot of variables.
@@ -171,7 +201,7 @@ ggpubr::ggqqplot(log(iris$Sepal.Length)) # set the variable that you want to get
 
 Let's build a data set for our regressions and model: 
 
-```{r, out.width="50%",fig.show='hold'}
+```{r, out.width="50%",fig.show='hold',collapse=TRUE}
 #library(qqplotr)
 set.seed(15)
 df<-data.frame(temperature=rnorm(100,mean = 25,sd=8),
@@ -179,7 +209,11 @@ df<-data.frame(temperature=rnorm(100,mean = 25,sd=8),
                radiation=rnorm(100,mean = 5000,sd=1000),
                bacterias=rnorm(100,mean = 50,sd=24.22),
                groups=c("Day","Night"))
-head(df) 
+head(df,6)
+```
+
+
+```{r, out.width="50%",fig.show='hold',collapse=TRUE}
 shapiro.test(df$radiation) # normal distribution
 shapiro.test(df$wind) # normal distribution
 shapiro.test(df$temperature) #normal distribution
@@ -202,7 +236,7 @@ ggplot(df,mapping = aes(x=temperature,y=bacterias))+
 
 *Alternative hypothesis (H1):* Bacteria population changes with temperature, radiation,etc.
 
-```{r,}
+```{r,collapse=TRUE}
 fit.lm<- lm(bacterias~temperature,data=df)
 summary(fit.lm)
 ```
@@ -244,14 +278,14 @@ Here we can see that the residual errors are constant across the groups and dist
 
 ### Run the same test for each variable
 
-```{r}
+```{r,collapse=TRUE}
 results<-data.frame(do.call(rbind,lapply(df[,1:3],function(x) shapiro.test(x)[c("statistic","p.value")])))
 results # how the data looks like
 ```
 
 Let's take each element and extract just what we need.
 
-```{r}
+```{r,collapse=TRUE}
 results$statistic<-unlist(results$statistic) # remove any text left,the list structure and make it a new vector
 results$p.value<-unlist(results$p.value) #remove the list structure and make it a new vector
 str(results) # data frame with two numeric variables
@@ -259,7 +293,7 @@ str(results) # data frame with two numeric variables
 
 Most of the time there are multiple options so you can also do something like this too:
 
-```{r}
+```{r,collapse=TRUE}
 #option 2
 allshapiro.tes<-lapply(df[,1:3],shapiro.test) #as a list apply the function shapiro.test to the variables [,1:3] in the data frame df
 #allshapiro.tes # how the data looks like for all the variables
@@ -335,7 +369,7 @@ ggplot(data=airquality,mapping = aes(sample=Ozone))+
 To use ggplot2 at a more advanced level you need to set a long data format. This means that all your response variables need to be in rows and a grouping in a different variable.
 Let's use the iris dataset once again.
 
-```{r,fig.show='hold',out.width="50%"}
+```{r,fig.show='hold',out.width="50%",collapse=TRUE}
 head(iris)
 iris.long<-tidyr::gather(data=iris,key="Response_variable",value="observation_value",1:4) #the numbers represent the columns that you want to make rows. 
 # lets bring the code from the first graph and change the variables and the data set
