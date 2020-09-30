@@ -19,7 +19,7 @@ Once you finished the installation open R-studio and let's get started by instal
 ```{r,eval=FALSE}
 #to install a package then you need to know the name of the package and run the following code
 install.packages("tidyverse") #ctrl+ enter to run a line
-install.packages(c("gapminder","ggpubr","ggsci"."plotrix","plyr","gcookbook")) #multiple packages in one line
+install.packages(c("gapminder","ggpubr","ggsci","plotrix","plyr","gcookbook")) #multiple packages in one line
 ```
 
 We load the packages every time that we open a new R session.
