@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+<title>Week 2: Model Fitting with Linear Regression - BNU-Statistics with R</title>
+<meta property="og:title" content="Week 2: Model Fitting with Linear Regression - BNU-Statistics with R">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/foundation.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.jpg"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/Roberto-Supe">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">15 min read</span>
+    
+
+    <h1 class="article-title">Week 2: Model Fitting with Linear Regression</h1>
+
+    
+    <span class="article-date">2020-09-30</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>This week we will cover data summaries, data structure, linear regression and its assumptions.</p>
+<p>At the beginning of each session we will need to load our libraries, so let’s load the packages for this week</p>
+<pre class="r"><code>library(tidyverse)
+library(plotrix)
+library(ggpubr) #install.packages(&quot;ggpubr&quot;)
+library(qqplotr) #install.packages(&quot;qqplotr&quot;)
+library(PerformanceAnalytics)#install.packages(&quot;PerformanceAnalytics&quot;)
+library(gcookbook)
+library(tidyr) #install.packages(&quot;tidyr&quot;)  </code></pre>
+<div id="sample-statistics-and-summary-results" class="section level1">
+<h1>Sample Statistics and Summary results</h1>
+<p>Mean, variance, and error values are always required for the final report. It can take a while to sort the data in the right way and several times you may want to check how your data looks frequently. <code>Tydiverse</code> is a complex group of packages that include <code>ggplot2</code> and <code>dplyr</code>. Adding, changing, combining, removing is simple with <code>dplyr</code>.</p>
+<pre class="r"><code>data(&quot;storms&quot;)
+head(storms) #look at the first 6 rows
+## # A tibble: 6 x 13
+##   name   year month   day  hour   lat  long status category  wind pressure
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;ord&gt;    &lt;int&gt;    &lt;int&gt;
+## 1 Amy    1975     6    27     0  27.5 -79   tropi~ -1          25     1013
+## 2 Amy    1975     6    27     6  28.5 -79   tropi~ -1          25     1013
+## 3 Amy    1975     6    27    12  29.5 -79   tropi~ -1          25     1013
+## 4 Amy    1975     6    27    18  30.5 -79   tropi~ -1          25     1013
+## 5 Amy    1975     6    28     0  31.5 -78.8 tropi~ -1          25     1012
+## 6 Amy    1975     6    28     6  32.4 -78.7 tropi~ -1          25     1012
+## # ... with 2 more variables: ts_diameter &lt;dbl&gt;, hu_diameter &lt;dbl&gt;</code></pre>
+<pre class="r"><code>mean(storms$wind) # mean wind speed of all the recored storms
+## [1] 53.495</code></pre>
+<pre class="r"><code>sd(storms$pressure) # pressure standard deviation of all the recored storms
+## [1] 19.51678</code></pre>
+<pre class="r"><code>plotrix::std.error(storms$ts_diameter) # standard error of storm eye diameter 
+## [1] 2.394685</code></pre>
+<p>I am sure that you are familiar with that as it is something we can get from any statistical program, now, let’s look at how to deal with more information and different results.</p>
+<pre class="r"><code>#library(tidyverse)
+storms[,c(1,2,10,11)]%&gt;% #dataset and variables we will work with [row,column] use c(for selecting multiple columns)
+  dplyr::group_by(name,year)%&gt;% #group by name and year
+  dplyr::summarise_all(funs(mean(.,na.rm = T), #use funs( to get multiple stimators)
+                           sd(.),
+                           var(.), #sd^2
+                           plotrix::std.error(.),
+                           observations=length(.))) # we can name the variables directly  length tells you how many observations in each group
+## # A tibble: 426 x 12
+## # Groups:   name [198]
+##    name   year wind_mean pressure_mean wind_sd pressure_sd wind_var pressure_var
+##    &lt;chr&gt; &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;        &lt;dbl&gt;
+##  1 AL01~  1993      27.5         1000.    2.67       1.55      7.14        2.41 
+##  2 AL01~  2000      25           1009.    0          0.957     0           0.917
+##  3 AL02~  1992      29           1007.    2.24       0.894     5           0.8  
+##  4 AL02~  1994      24.2         1016.    5.85       0.753    34.2         0.567
+##  5 AL02~  1999      28.8         1005.    2.5        0.957     6.25        0.917
+##  6 AL02~  2000      29.2         1009.    1.95       0.515     3.79        0.265
+##  7 AL02~  2001      25           1011     0          0.707     0           0.5  
+##  8 AL02~  2003      30           1009.    0          0.957     0           0.917
+##  9 AL02~  2006      38           1002.    5.70       4.04     32.5        16.3  
+## 10 AL03~  1987      21.2         1010.    8.71       2.44     75.8         5.97 
+## # ... with 416 more rows, and 4 more variables:
+## #   `wind_plotrix::std.error` &lt;dbl&gt;, `pressure_plotrix::std.error` &lt;dbl&gt;,
+## #   wind_observations &lt;int&gt;, pressure_observations &lt;int&gt;</code></pre>
+<ul>
+<li><strong>group_by</strong> is one of the best elements of dplyr, it works by making one data set for all the information you add in group_by(). Here, we group all the storms with the same name, if there are multiple elements then we group them again by year. In the output you will see there is ’Groups: name [198]` this means that there are 198 names, some with multiple years so we get a data set with 426 rows.</li>
+<li><strong>summarise_all</strong> means that all the functions will be applied to all the variables excluded from <code>group_by</code>.</li>
+<li><strong>na.rm</strong> and <strong>‘.’</strong>: The <code>.</code> means take all the information as it is no changes. <code>na.rm=T</code> means TRUE (yes) to remove missing values if there are some</li>
+</ul>
+<p>You want to know if there is a relationship between wind and pressure so we need to visualize both variables in a scatter plot.</p>
+<pre class="r"><code>data(&quot;storms&quot;) #we will work with the dataset: Carbon Dioxide Uptake in Grass Plants
+tail(storms,4) #show me the last 4 observations 
+## # A tibble: 4 x 13
+##   name   year month   day  hour   lat  long status category  wind pressure
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;ord&gt;    &lt;int&gt;    &lt;int&gt;
+## 1 Kate   2015    11    11     0  33.1 -71.3 hurri~ 1           65      990
+## 2 Kate   2015    11    11     6  35.2 -67.6 hurri~ 1           70      985
+## 3 Kate   2015    11    11    12  36.2 -62.5 hurri~ 1           75      980
+## 4 Kate   2015    11    11    18  37.6 -58.2 hurri~ 1           65      980
+## # ... with 2 more variables: ts_diameter &lt;dbl&gt;, hu_diameter &lt;dbl&gt;
+# we will begin by ploting the variables of our hypothesis</code></pre>
+<pre class="r"><code>ggplot(storms,mapping = aes(x=wind,y=pressure))+
+  geom_point()</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Looks like there is some sort of relationship, negative relationship, between our variables of interest. However, we need statistical models to determine the changes in pressure with wing and how significant are those changes.</p>
+</div>
+<div id="least-squares-linear-regression" class="section level1">
+<h1>Least squares Linear Regression:</h1>
+<p>The least squares method also deffined as the <em>line of best fit</em> aims to produce a model that reduces the <em>variation </em>or <em>error</em> between the expected and predicted values. Next, we will run a simple linear regression with <code>lm</code> with our two variables to understand this concept and the estimation of model parameters which are often called <strong>ordinary least squares estimates</strong>. The previous scatter looked roughly linear, so let’s examine their relationship.</p>
+<pre class="r"><code>fit.lm&lt;-lm(pressure~wind, data = storms) # y~x makes sure to use this `~`
+fit.lm #information inside fit.lm
+## 
+## Call:
+## lm(formula = pressure ~ wind, data = storms)
+## 
+## Coefficients:
+## (Intercept)         wind  
+##   1029.6670      -0.7015</code></pre>
+<p>Equation for the LSLR: 1029.66 - 0.7015x</p>
+<p>We can also add the error term by using <code>sigma</code></p>
+<pre class="r"><code>sigma(fit.lm) # residual standard deviation E
+## [1] 6.536737</code></pre>
+<pre class="r"><code>confint(fit.lm) # get confidence intervals for all the terms
+##                    2.5 %       97.5 %
+## (Intercept) 1029.3759591 1029.9580714
+## wind          -0.7064102   -0.6966387</code></pre>
+<p>Therefore, the equation for the LSLR with a CI of 95% confidence level will be: 1029.66 - 0.7015x <span class="math inline">\(\pm\)</span> 6.537.</p>
+<div id="confidence-intervals-ci" class="section level2">
+<h2>Confidence Intervals (CI)</h2>
+<p>They are values that also represent the accuracy of our sample mean. This will show a range of plausible values not only for the mean but for any unknown parameter.</p>
+<pre class="r"><code>labels&lt;-data.frame(label=c(&quot;99%&quot;,&quot;95%&quot;,&quot;90%&quot;,&quot;90%&quot;,&quot;95%&quot;,&quot;99%&quot;),
+          x=c(-2.326348,-1.644854,-1.281552,1.281552,1.644854,2.326348),
+          y=c(0.03,0.105,0.18,0.18,0.105,0.03))
+ggplot(NULL, aes(x = c(-4, 4))) +
+  stat_function(fun = dnorm,
+    geom = &quot;area&quot;,fill = &quot;grey10&quot;,alpha = .3) +
+  geom_vline(xintercept =0,colour=&quot;black&quot;,linetype=&quot;dotted&quot;)+
+  stat_function(fun = dnorm,
+    geom = &quot;area&quot;,fill = &quot;steelblue&quot;,
+    xlim = c(-qnorm(.90), -4))+
+  stat_function(fun = dnorm,geom = &quot;area&quot;,fill = &quot;steelblue&quot;,xlim = c(qnorm(.90), 4))+
+  stat_function(fun = dnorm,geom = &quot;area&quot;,fill = &quot;tomato&quot;,xlim = c(qnorm(.95), 4))+
+  stat_function(fun = dnorm,geom = &quot;area&quot;,fill = &quot;tomato&quot;,xlim = c(-qnorm(.95), -4))+
+  stat_function(fun = dnorm,geom = &quot;area&quot;,fill = &quot;forestgreen&quot;,xlim = c(qnorm(.99), 4))+
+  stat_function(fun = dnorm,geom = &quot;area&quot;,fill = &quot;forestgreen&quot;,xlim = c(-qnorm(.99), -4))+
+  ggrepel::geom_text_repel(data=labels,mapping = aes(x=x,y=y,label=label),nudge_y = 0.1)+
+  annotate(&quot;text&quot;,x=-3.5,y=0.3,label=paste0(&quot;N(&quot;,&quot;\u03BC&quot;,&quot;,&quot;,&quot;\u03C3&quot;,&quot;\u00B2&quot;, &quot;)&quot;),size=6,fontface = &#39;italic&#39;)+
+  labs(title = &quot;Normal Distribution&quot;,x =&quot;&quot;,y = &quot;f(x)&quot;) +
+  scale_x_continuous(breaks = c(-2.326348,-1.644854,-1.281552,0,1.281552,1.644854,2.326348),
+                     labels = c(paste0(&quot;\u03BC&quot;,c(-3,-2,-1),&quot;\u03C3&quot;),&quot;\u03BC&quot;,paste0(&quot;\u03BC&quot;,&quot;\u002B&quot;,c(1,2,3),&quot;\u03C3&quot;)))+
+  scale_y_continuous(expand = c(0.0,0.0))+ # no space at the top/bottom
+  theme_bw()+
+  theme(panel.grid = element_blank(), # remove grid lines 
+        axis.text.x = element_text(colour=&quot;black&quot;), # text of x axis black
+        axis.text.y =element_blank(), #remove the labels of y axis
+        axis.ticks.y = element_blank()) #remove the ticks on y axis only</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>As we increase our confidence interval we are more likely to include the true value of the parameter.</p>
+</div>
+<div id="coefficient-of-determination" class="section level2">
+<h2>Coefficient of determination</h2>
+<p>In our regression model, the coefficient of determination is calculated by diving the quotient of the variances of the fitted values and observed values of the dependent variable. This tells us <strong>how much of the variation of y is explain by the model</strong> or how well the model fits the data. It is important that you look at the adjusted R-square when fitting a multiple regression because it deals with any noise created by adding more variables.</p>
+<pre class="r"><code>results=base::summary(fit.lm) #save all the summary in a large summary
+results$r.squared #take the coefficient of determination
+## [1] 0.8878337</code></pre>
+<p>The model explains 88.78% of the variation in pressure.</p>
+</div>
+</div>
+<div id="simple-linear-regression" class="section level1">
+<h1>Simple Linear Regression</h1>
+<p>The regression model was done and we needed to know how significant those results are. However, before we begin, it is important that you check the data before regression and any other model that you run. By this, it is meant that we should determine something like the normality of the data. There are multiple tests and if not normally distributed, we will need to transform the data.</p>
+<div id="assumption-one-normality" class="section level2">
+<h2>Assumption One (Normality)</h2>
+<p>Use <code>shapiro.test</code> to carry out the normality test, here, the H0 is that data is normally distributed. P-Values &gt;0.05 will support this normal distribution of your variable.</p>
+<pre class="r"><code>#library(gcookbook) #data set
+library(gcookbook)
+data(&quot;heightweight&quot;)
+shapiro.test(heightweight$heightIn) # normality test passed
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  heightweight$heightIn
+## W = 0.99628, p-value = 0.849</code></pre>
+<pre class="r"><code># normality test failed
+shapiro.test(iris$Sepal.Length) 
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  iris$Sepal.Length
+## W = 0.97609, p-value = 0.01018</code></pre>
+<pre class="r"><code># normality test with transformed data passed
+shapiro.test(log(iris$Sepal.Length))
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  log(iris$Sepal.Length)
+## W = 0.98253, p-value = 0.05388</code></pre>
+<p>Clearly, we can make more sense of the data when we plot it. This will be useful when you got a lot of variables.</p>
+<pre class="r"><code># not transformed data
+ggplot(data=iris,mapping = aes(sample=Sepal.Length))+
+  geom_qq()+
+  geom_qq_line()+
+  theme_bw()
+#plot with transformed data and an alternative package to ggplot2 
+ggpubr::ggqqplot(log(iris$Sepal.Length)) # set the variable that you want to get the qqplot</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-17-1.png" width="50%" /><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-17-2.png" width="50%" /></p>
+<ul>
+<li><p>Data transformation resulted in a better qq-plot. Now we can see why it passed <code>shapiro.test</code>.</p></li>
+<li><p>We used two options, one plot with the normal ggplot2 and the second one with the package <code>ggpubr</code>. The last is a package that reduces ggplot2 lines of code and gives you great results. If you work with small data sets and you want to have good graphs it is a great option. We will cover more about this package in a few weeks.</p></li>
+</ul>
+<p>Let’s build a data set for our regressions and model:</p>
+<pre class="r"><code>#library(qqplotr)
+set.seed(15)
+df&lt;-data.frame(temperature=rnorm(100,mean = 25,sd=8),
+               wind=rnorm(100,mean = 10,sd=1.2),
+               radiation=rnorm(100,mean = 5000,sd=1000),
+               bacterias=rnorm(100,mean = 50,sd=24.22),
+               groups=c(&quot;Day&quot;,&quot;Night&quot;))
+head(df,6)
+##   temperature      wind radiation bacterias groups
+## 1    27.07058  9.951969  5818.690  55.49904    Day
+## 2    39.64897  9.964412  4938.840  29.82846  Night
+## 3    22.28305  8.550304  5527.404  38.30339    Day
+## 4    32.17759 11.758406  4995.665  60.15574  Night
+## 5    28.90413 11.294930  5228.475  42.19714    Day
+## 6    14.95691  9.598272  3894.247  85.30897  Night</code></pre>
+<pre class="r"><code>shapiro.test(df$radiation) # normal distribution
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  df$radiation
+## W = 0.96947, p-value = 0.02012
+shapiro.test(df$wind) # normal distribution
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  df$wind
+## W = 0.97584, p-value = 0.06274
+shapiro.test(df$temperature) #normal distribution
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  df$temperature
+## W = 0.992, p-value = 0.8216</code></pre>
+</div>
+<div id="assumption-two-linearity" class="section level2">
+<h2>Assumption two (Linearity)</h2>
+<p>The relationship between the independent and dependent variables must be linear. A scatter plot is our alternative to test if there is a linear distribution that would show our points is something like a straight line.</p>
+<pre class="r"><code>ggplot(df,mapping = aes(x=temperature,y=bacterias))+
+  geom_point()</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<ul>
+<li><p>There is no clear linearity but you can see that data is showing a slightly decreasing trend.</p></li>
+<li><p>Now that all the variables are normally distributed and there is a linear relationship we can use them in our regression.</p></li>
+</ul>
+<p><em>Null hypothesis (H0):</em> There is no change in bacteria population with temperature, radiation,etc.</p>
+<p><em>Alternative hypothesis (H1):</em> Bacteria population changes with temperature, radiation,etc.</p>
+<pre class="r"><code>fit.lm&lt;- lm(bacterias~temperature,data=df)
+summary(fit.lm)
+## 
+## Call:
+## lm(formula = bacterias ~ temperature, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -49.153 -16.873   1.069  16.100  54.899 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  72.4498     7.9532   9.110 1.04e-14 ***
+## temperature  -0.7300     0.2945  -2.478   0.0149 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 23.3 on 98 degrees of freedom
+## Multiple R-squared:  0.05898,    Adjusted R-squared:  0.04938 
+## F-statistic: 6.142 on 1 and 98 DF,  p-value: 0.01491</code></pre>
+<p>Breakdown of the elements of the results summary:</p>
+<ul>
+<li><p>The estimates <code>(Estimate)</code> is the <em>change</em> in y caused by each element of the regression. (Intercept) or the value of the y-intercept (in this case 60.7266) is the calculated value of y when x is 0. <code>temperature or any x variabel</code> values in the <code>Estimate</code> column show changes in y (e.g. population of bacteria) with one unit increase in <code>x</code>. Therefore, for the temperature group, we could say that the bacteria population gets reduced by -0.22 units for each increment in temperature if Pr(&gt;|t|) &lt; 0.05. Here it is not the case so we can not reach that conclusion.</p></li>
+<li><p>The standard error of the estimated values are in the second column <code>Std. Error</code>.</p></li>
+<li><p>The test statistic showed under <code>t value</code>.</p></li>
+<li><p>The p-value <code>Pr(&gt;| t | )</code>, the probability of finding the given t-statistic by chance and therefore, the calculated <code>estimate</code> for that variable.</p></li>
+</ul>
+<p>We can see that the bacteria population did not change with temperature (P-value&gt;0.05). Let’s see how radiation affects our bacteria population</p>
+<pre class="r"><code>fit.lm&lt;- lm(bacterias~radiation,data=df)
+summary(fit.lm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = bacterias ~ radiation, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -48.910 -17.761  -0.201  13.905  58.504 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 64.030405  11.503156   5.566 2.27e-07 ***
+## radiation   -0.002119   0.002287  -0.927    0.356    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 23.92 on 98 degrees of freedom
+## Multiple R-squared:  0.008686,   Adjusted R-squared:  -0.001429 
+## F-statistic: 0.8587 on 1 and 98 DF,  p-value: 0.3564</code></pre>
+<p>We got similar results so we would conclude that we are 95% confident that radiation and temperature alone do not affect the population of bacterias. 95% confident because we run our model at this CI.</p>
+</div>
+<div id="model-test-assumption-homoscedasticity" class="section level2">
+<h2>Model test assumption (Homoscedasticity)</h2>
+<p>We should ensure that the model fitted meets this last assumption, the same variance over the range of predicition, to maintain the model. This means that the error term needs to be the same across all values of the independent variables. The fitted model already has all the information that we need for the plots so we will just call <code>plot(model)</code>.</p>
+<pre class="r"><code>par(mfrow=c(2,2)) #plot panel to fit 2 by 2 pictures
+plot(fit.lm) # lm result has 4 figures</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<pre class="r"><code>par(mfrow=c(1,1)) #we set them back to normal</code></pre>
+<p>Here we can see that the residual errors are constant across the groups and distributed evenly. Look at the <code>Normal Q-Q</code> (top right) which under homoscedasticity it should show the points along the line.</p>
+<ul>
+<li>This will conclude a simple linear regression model and its analysis.</li>
+</ul>
+</div>
+<div id="extra-notes" class="section level2">
+<h2>Extra Notes</h2>
+<ul>
+<li>When we got a lot of variables, We can do the test in one line of code with <strong>lappy</strong>. Additionally, when you run multiple variables the resulting object is a list (results of the first, results of the second, results of the n) to observe and export all those values or use them in other parts of your documents then we need to unlist and save them in a data frame.</li>
+</ul>
+<div id="run-the-same-test-for-each-variable" class="section level3">
+<h3>Run the same test for each variable</h3>
+<pre class="r"><code>results&lt;-data.frame(do.call(rbind,lapply(df[,1:3],function(x) shapiro.test(x)[c(&quot;statistic&quot;,&quot;p.value&quot;)])))
+results # how the data looks like
+##             statistic    p.value
+## temperature 0.9920047  0.8215678
+## wind        0.9758363 0.06274086
+## radiation    0.969466 0.02012186</code></pre>
+<p>Let’s take each element and extract just what we need.</p>
+<pre class="r"><code>results$statistic&lt;-unlist(results$statistic) # remove any text left,the list structure and make it a new vector
+results$p.value&lt;-unlist(results$p.value) #remove the list structure and make it a new vector
+str(results) # data frame with two numeric variables
+## &#39;data.frame&#39;:    3 obs. of  2 variables:
+##  $ statistic: num  0.992 0.976 0.969
+##  $ p.value  : num  0.8216 0.0627 0.0201</code></pre>
+<p>Most of the time there are multiple options so you can also do something like this too:</p>
+<pre class="r"><code>#option 2
+allshapiro.tes&lt;-lapply(df[,1:3],shapiro.test) #as a list apply the function shapiro.test to the variables [,1:3] in the data frame df
+#allshapiro.tes # how the data looks like for all the variables
+results&lt;-data.frame(t(sapply(allshapiro.tes,`[`,c(&quot;statistic&quot;,&quot;p.value&quot;)))) #let&#39;s take what we really need 
+results$statistic&lt;-unlist(results$statistic) # remove any text left,the list structure and make it a new vector
+results$p.value&lt;-unlist(results$p.value) #remove the list structure and make it a new vector
+str(results)
+## &#39;data.frame&#39;:    3 obs. of  2 variables:
+##  $ statistic: num  0.992 0.976 0.969
+##  $ p.value  : num  0.8216 0.0627 0.0201</code></pre>
+</div>
+</div>
+<div id="correlations-histograms-and-scatters-plot-modifications" class="section level2">
+<h2>Correlations, histograms, and scatters plot modifications</h2>
+<p>Here there is a function to get a plot with correlations, scatter plot, and histograms with text over the bins.</p>
+<pre class="r"><code>panel.cor &lt;- function(x, y, digits = 2, prefix = &quot;&quot;, cex.cor, ...) {
+  usr &lt;- par(&quot;usr&quot;)
+  on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r &lt;- abs(cor(x, y, use = &quot;complete.obs&quot;,method = &quot;pearson&quot;))
+  txt &lt;- format(c(r, 0.123456789), digits = digits)[1]
+  txt &lt;- paste(prefix, txt, sep = &quot;&quot;)
+  if (missing(cex.cor)) cex.cor &lt;- 0.8/strwidth(txt)
+  text(0.5, 0.5, txt, cex =  cex.cor * (1 + r) / 2)
+}
+
+panel.hist &lt;- function(x, ...) {
+  usr &lt;- par(&quot;usr&quot;)
+  on.exit(par(usr))
+  par(usr = c(usr[1:2], 0, 1.5) )
+  h &lt;- hist(x, plot = FALSE)
+  breaks &lt;- h$breaks
+  nB &lt;- length(breaks)
+  y &lt;- h$counts
+  y &lt;- y/max(y)
+  rect(breaks[-nB], 0, breaks[-1], y, col = &quot;white&quot;, ...)
+}
+
+df %&gt;% # your data frame
+  dplyr::select(-groups) %&gt;% #remove categorical variables names or numbers if multiple -c()
+  pairs(
+    upper.panel = panel.cor,
+    diag.panel  = panel.hist,
+    lower.panel = panel.smooth
+  )</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+</div>
+<div id="alternative-qqplots" class="section level2">
+<h2>Alternative qqplots</h2>
+<p><code>ggpurb</code> adds a confidence region with the qqplot, we can do that with ggplot2 and the package <code>qqplotr</code></p>
+<pre class="r"><code>library(qqplotr) #install.packages(&quot;qqplotr&quot;)
+ggplot(data=airquality,mapping = aes(sample=Ozone))+
+  geom_qq()+
+  geom_qq_line()+
+  facet_wrap(.~Month,scales = &quot;free&quot;)+
+  theme_bw()
+ggplot(data=airquality,mapping = aes(sample=Ozone))+
+  #geom_qq()+
+  stat_qq_band()+
+  stat_qq_line()+
+  stat_qq_point()+
+  facet_wrap(.~Month,scales = &quot;free&quot;)+
+  theme_bw()
+#values should be inside that grey shadow </code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-28-1.png" width="50%" /><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-28-2.png" width="50%" /></p>
+</div>
+<div id="rearrange-multiple-variables-for-ggplot2" class="section level2">
+<h2>Rearrange multiple variables for ggplot2</h2>
+<p>To use ggplot2 at a more advanced level you need to set a long data format. This means that all your response variables need to be in rows and a grouping in a different variable.
+Let’s use the iris dataset once again.</p>
+<pre class="r"><code>head(iris)
+##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa
+iris.long&lt;-tidyr::gather(data=iris,key=&quot;Response_variable&quot;,value=&quot;observation_value&quot;,1:4) #the numbers represent the columns that you want to make rows. 
+# lets bring the code from the first graph and change the variables and the data set
+ggplot(data=iris.long,mapping = aes(sample=observation_value))+
+  geom_qq()+
+  geom_qq_line()+
+  facet_grid(Response_variable~Species,scales = &quot;free&quot;)+ #y~x
+  theme_bw()
+
+# we got two options for the facets grid and wrap so let&#39;s try facet_wrap to see the differences
+ggplot(data=iris.long,mapping = aes(sample=observation_value))+
+  geom_qq()+
+  geom_qq_line()+
+  facet_wrap(Response_variable~Species,scales = &quot;free&quot;)+ #y~x
+  theme_bw()</code></pre>
+<p><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-29-1.png" width="50%" /><img src="/post/2020-09-30-week-2-regression-and-fitting-models_files/figure-html/unnamed-chunk-29-2.png" width="50%" /></p>
+<p>That is a great and fast way to see distributions and you can create many plots at once.</p>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-179273490-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

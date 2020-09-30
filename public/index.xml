@@ -6,7 +6,18 @@
     <description>Recent content on BNU-Statistics with R</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 23 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 30 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Week 2: Model Fitting with Linear Regression</title>
+      <link>/2020/09/30/week-2-regression-and-fitting-models/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/09/30/week-2-regression-and-fitting-models/</guid>
+      <description>This week we will cover data summaries, data structure, linear regression and its assumptions.
+At the beginning of each session we will need to load our libraries, so let’s load the packages for this week
+library(tidyverse)library(plotrix)library(ggpubr) #install.packages(&amp;quot;ggpubr&amp;quot;)library(qqplotr) #install.packages(&amp;quot;qqplotr&amp;quot;)library(PerformanceAnalytics)#install.packages(&amp;quot;PerformanceAnalytics&amp;quot;)library(gcookbook)library(tidyr) #install.packages(&amp;quot;tidyr&amp;quot;) Sample Statistics and Summary resultsMean, variance, and error values are always required for the final report. It can take a while to sort the data in the right way and several times you may want to check how your data looks frequently.</description>
+    </item>
+    
     <item>
       <title>Week 1: Introduction</title>
       <link>/2020/09/23/stats-course-1week/</link>
@@ -32,7 +43,7 @@ Once you finished the installation open R-studio and let’s get started by inst
       <pubDate>Sun, 20 Sep 2020 21:48:51 -0700</pubDate>
       
       <guid>/about/</guid>
-      <description>This site is build to provide additional information and content to the lecture slides. All the code can be used to replicate the graphs with different data sets. It is a page created for you to be familiar with R-Studio and other very important packages. All the code was done by Roberto Supe following the slides of Professor Yingxia Li</description>
+      <description>This site was built to provide additional information and content to the lecture slides of the course Environmental Statistics at Beijing Normal University. All the code used for the graphs is included in the posts so it can be used to replicate them with your data. Similarly, It is a page created for you to be familiar with R-Studio and other very important packages that will help you during your studies and career.</description>
     </item>
     
   </channel>

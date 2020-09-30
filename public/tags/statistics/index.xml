@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>statistics on BNU-Statistics with R</title>
+    <link>/tags/statistics/</link>
+    <description>Recent content in statistics on BNU-Statistics with R</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 30 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="/tags/statistics/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Week 2: Model Fitting with Linear Regression</title>
+      <link>/2020/09/30/week-2-regression-and-fitting-models/</link>
+      <pubDate>Wed, 30 Sep 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/09/30/week-2-regression-and-fitting-models/</guid>
+      <description>This week we will cover data summaries, data structure, linear regression and its assumptions.
+At the beginning of each session we will need to load our libraries, so let’s load the packages for this week
+library(tidyverse)library(plotrix)library(ggpubr) #install.packages(&amp;quot;ggpubr&amp;quot;)library(qqplotr) #install.packages(&amp;quot;qqplotr&amp;quot;)library(PerformanceAnalytics)#install.packages(&amp;quot;PerformanceAnalytics&amp;quot;)library(gcookbook)library(tidyr) #install.packages(&amp;quot;tidyr&amp;quot;) Sample Statistics and Summary resultsMean, variance, and error values are always required for the final report. It can take a while to sort the data in the right way and several times you may want to check how your data looks frequently.</description>
+    </item>
+    
+  </channel>
+</rss>

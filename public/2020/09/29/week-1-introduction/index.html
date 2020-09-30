@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+<title>Week 1: Introduction - BNU-Statistics with R</title>
+<meta property="og:title" content="Week 1: Introduction - BNU-Statistics with R">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/foundation.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.jpg"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/Roberto-Supe">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">10 min read</span>
+    
+
+    <h1 class="article-title">Week 1: Introduction</h1>
+
+    
+    <span class="article-date">2020-09-29</span>
+    
+
+    <div class="article-content">
+      <h2 id="why-r">Why R</h2>
+<p>R is one of the most complex and sofisticated statistical softwares. Similarly, the current acceptance of the software is high in many fields and work lines. There is an infinite number of applications with R, you can have linear regressions, spatial analysis, graphs, books, journals, even APPs have been added in the last few years. Scientists are constantly updating the program and other packages for us to find it easier to interact with it. 
+In these documents, we will provide you with the code required to replicate the main graphs given to you during the course. Additionally, the major parts and elements of the code have some explanations about the role and function so you can understand it better and follow it nicely. At the same time, you will be familiar with a program that is a great skill in the field of environmental science, programming, and statistics in general.</p>
+<h2 id="pareto-chart">Pareto Chart</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(qcc) #run this to install a package that let&#39;s you create the graph</span>
+x<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">8</span>,<span style="color:#ae81ff">7</span>) <span style="color:#75715e">#values</span>
+<span style="color:#a6e22e">names</span>(x)<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;A&#34;</span>,<span style="color:#e6db74">&#34;B&#34;</span>,<span style="color:#e6db74">&#34;C&#34;</span>,<span style="color:#e6db74">&#34;D&#34;</span>) <span style="color:#75715e">#groups</span>
+<span style="color:#75715e">#let&#39;s look how x data is looks like</span>
+x
+<span style="color:#75715e">## A B C D </span>
+<span style="color:#75715e">## 4 5 8 7</span>
+</code></pre></div><p>Here each value of x has a group name so we can plot <code>x</code> with <code>qcc::pareto.chart</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(qcc) <span style="color:#75715e"># to use all the functions from that package run the library(package_name) once per session</span>
+<span style="color:#a6e22e">pareto.chart</span>(x,ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Change (Million People)&#34;</span>,
+             ylab2<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Cumulative Percentage&#34;</span>)
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<pre><code>##    
+## Pareto chart analysis for x
+##     Frequency Cum.Freq. Percentage Cum.Percent.
+##   C   8.00000   8.00000   33.33333     33.33333
+##   D   7.00000  15.00000   29.16667     62.50000
+##   B   5.00000  20.00000   20.83333     83.33333
+##   A   4.00000  24.00000   16.66667    100.00000
+</code></pre><p>Usually, we work with a wide data set and you may want to do the plot for x variable then we can do the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">df<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data.frame</span>(rain<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span>,<span style="color:#ae81ff">8</span>,<span style="color:#ae81ff">7</span>), <span style="color:#75715e">#values</span>
+               temperature<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">2.5</span>,<span style="color:#ae81ff">3.1</span>,<span style="color:#ae81ff">4</span>,<span style="color:#ae81ff">5</span>),
+group<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;A&#34;</span>,<span style="color:#e6db74">&#34;B&#34;</span>,<span style="color:#e6db74">&#34;C&#34;</span>,<span style="color:#e6db74">&#34;D&#34;</span>)) <span style="color:#75715e">#groups</span>
+df <span style="color:#75715e">#when you import a data set it will look like this</span>
+<span style="color:#75715e">##   rain temperature group</span>
+<span style="color:#75715e">## 1    4         2.5     A</span>
+<span style="color:#75715e">## 2    5         3.1     B</span>
+<span style="color:#75715e">## 3    8         4.0     C</span>
+<span style="color:#75715e">## 4    7         5.0     D</span>
+<span style="color:#75715e">#let&#39;s set the data the way needed for the plot with pareto.chart()</span>
+x<span style="color:#f92672">=</span>df<span style="color:#f92672">$</span>temperature <span style="color:#75715e"># take the info in a variable from the df data frame to x</span>
+<span style="color:#a6e22e">names</span>(x)<span style="color:#f92672">&lt;-</span>df<span style="color:#f92672">$</span>group <span style="color:#75715e"># get the values from the df data frame to x</span>
+<span style="color:#a6e22e">pareto.chart</span>(x) <span style="color:#75715e">#plot the graph </span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<pre><code>##    
+## Pareto chart analysis for x
+##     Frequency Cum.Freq. Percentage Cum.Percent.
+##   D   5.00000   5.00000   34.24658     34.24658
+##   C   4.00000   9.00000   27.39726     61.64384
+##   B   3.10000  12.10000   21.23288     82.87671
+##   A   2.50000  14.60000   17.12329    100.00000
+</code></pre><h2 id="the-grammar-of-graphics-ggplot2">The Grammar of Graphics: ggplot2</h2>
+<p>There is no better package for graphics than ggplot2, many of the new functions, packages, and other programs in R aim to build data results compatible with ggplot2 therefore, if you want to learn something in R this is the right package.</p>
+<h3 id="data-requirements-for-ggplot2-graphs">Data requirements for ggplot2 graphs</h3>
+<ul>
+<li>First, something important to mention is that all the data required for figures created with ggplot2 need to be inside a variable. If x is not already a data.frame, they will be converted to one by <code>fortify()</code>. This means that the program will join all the info in one data set.</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(ggplot2)
+<span style="color:#a6e22e">data</span>(<span style="color:#e6db74">&#34;diamonds&#34;</span>)
+<span style="color:#75715e">#show the first 3 lines of the diamond data set</span>
+<span style="color:#a6e22e">head</span>(diamonds,<span style="color:#ae81ff">3</span>)
+<span style="color:#75715e">## # A tibble: 3 x 10</span>
+<span style="color:#75715e">##   carat cut     color clarity depth table price     x     y     z</span>
+<span style="color:#75715e">##   &lt;dbl&gt; &lt;ord&gt;   &lt;ord&gt; &lt;ord&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span>
+<span style="color:#75715e">## 1  0.23 Ideal   E     SI2      61.5    55   326  3.95  3.98  2.43</span>
+<span style="color:#75715e">## 2  0.21 Premium E     SI1      59.8    61   326  3.89  3.84  2.31</span>
+<span style="color:#75715e">## 3  0.23 Good    E     VS1      56.9    65   327  4.05  4.07  2.31</span>
+</code></pre></div><ul>
+<li>There is no right or wrong data style, we will learn to change the structure of data sets, filter, select, arrange your file in different ways.</li>
+<li>We will give you some tips that will make your future data files better for R-studio.</li>
+</ul>
+<p>Note:<em>you can get the data by using <code>ggplot_x_name$data</code></em></p>
+<h3 id="pareto-chart-with-ggplot2">Pareto Chart with ggplot2</h3>
+<p>As aforementioned, some packages have updated the old version to one that matches the syntax of ggplot2 like the following example.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(c(&#34;ggQC&#34;,&#34;gcookbook&#34;,&#34;tidyverse&#34;)) #the new qcc package for ggplot graphs</span>
+<span style="color:#a6e22e">library</span>(ggQC)  
+<span style="color:#a6e22e">library</span>(gcookbook) <span style="color:#75715e"># for the data set</span>
+<span style="color:#a6e22e">library</span>(ggplot2)  
+<span style="color:#a6e22e">data</span>(<span style="color:#e6db74">&#34;uspopchange&#34;</span>) <span style="color:#75715e"># let&#39;s use the change in population in america as and example</span>
+<span style="color:#75715e">#uspopchange</span>
+usa.pop<span style="color:#f92672">&lt;-</span>uspopchange[1<span style="color:#f92672">:</span><span style="color:#ae81ff">10</span>,] <span style="color:#75715e"># there are a lot of states so we can just take the first 10 states for the example data set</span>
+<span style="color:#75715e"># let&#39;s look at the first 2 rows of the data set</span>
+<span style="color:#a6e22e">head</span>(usa.pop,<span style="color:#ae81ff">2</span>)
+<span style="color:#75715e">##     State Abb Region Change</span>
+<span style="color:#75715e">## 1 Alabama  AL  South    7.5</span>
+<span style="color:#75715e">## 2  Alaska  AK   West   13.3</span>
+</code></pre></div><p>Now, the data is in a <code>data frame</code> style, we have a lot of variabels so we can do diferent graphs with different responce variables.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>(usa.pop,<span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>State,y<span style="color:#f92672">=</span>Change))<span style="color:#f92672">+</span>
+  ggQC<span style="color:#f92672">::</span><span style="color:#a6e22e">stat_pareto</span>(point.color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;red&#34;</span>, 
+                    point.size <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>, 
+                    line.color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;black&#34;</span>,
+                    bars.fill <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;steelblue&#34;</span>,<span style="color:#e6db74">&#34;tomato&#34;</span>))<span style="color:#f92672">+</span> <span style="color:#75715e">#fill of the bars is continous therefore you need to set the first and last and you will get a gradient for all the bars </span>
+  <span style="color:#a6e22e">theme_bw</span>() <span style="color:#75715e">#remove the background colour and keep the major and minor axis and some other plot structures </span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<p>This clearly looks much better with more control over the elements. There are a few things that we can change to make them better like labels better axis, a legend because a double y axis can mislead the readers. In the following example, we will use all the data set as R is better at working with large data sets.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(scales) # use the percent and other notation on the axis</span>
+<span style="color:#a6e22e">data</span>(<span style="color:#e6db74">&#34;uspopchange&#34;</span>)
+usa.pop <span style="color:#f92672">&lt;-</span> usa.pop<span style="color:#a6e22e">[order</span>(usa.pop<span style="color:#f92672">$</span>Change, decreasing<span style="color:#f92672">=</span><span style="color:#66d9ef">TRUE</span>),] <span style="color:#75715e">#order the data set by the values of Change in a decreasing order</span>
+usa.pop<span style="color:#f92672">$</span>State<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">factor</span>(usa.pop<span style="color:#f92672">$</span>State,levels <span style="color:#f92672">=</span> usa.pop<span style="color:#f92672">$</span>State) <span style="color:#75715e">#countries labels in the right place</span>
+p<span style="color:#f92672">=</span><span style="color:#a6e22e">ggplot</span>(usa.pop,<span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>State,y<span style="color:#f92672">=</span>Change))<span style="color:#f92672">+</span>
+  ggQC<span style="color:#f92672">::</span><span style="color:#a6e22e">stat_pareto</span>(point.color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;red&#34;</span>, 
+                    point.size <span style="color:#f92672">=</span> <span style="color:#ae81ff">2.5</span>, 
+                    shape<span style="color:#f92672">=</span><span style="color:#ae81ff">15</span>,
+                    line.color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;black&#34;</span>,
+                    bars.fill <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;steelblue&#34;</span>,<span style="color:#e6db74">&#34;tomato&#34;</span>))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">scale_y_continuous</span>(breaks <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">100</span>,<span style="color:#a6e22e">sum</span>(usa.pop<span style="color:#f92672">$</span>Change)), <span style="color:#75715e"># we need to control the left y axis breaks</span>
+                     sec.axis <span style="color:#f92672">=</span> <span style="color:#a6e22e">sec_axis</span>(<span style="color:#f92672">~</span><span style="color:#a6e22e">./sum</span>(usa.pop<span style="color:#f92672">$</span>Change)<span style="color:#f92672">*</span><span style="color:#ae81ff">100</span>, <span style="color:#75715e">#this is Cumulative Sum(y)/sum(all states in change)*100 (%)</span>
+                                         breaks <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">25</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">100</span>), <span style="color:#75715e"># which breaks do you want to show</span>
+                                         labels <span style="color:#f92672">=</span> scales<span style="color:#f92672">::</span><span style="color:#a6e22e">percent_format</span>(scale <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>), <span style="color:#75715e">#from the package scales use :: percent, we need to use percent_format(scale=1) because transform the axis in 100 already </span>
+                                         name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Country Cumulative Change&#34;</span>))<span style="color:#f92672">+</span> <span style="color:#75715e"># give it a name</span>
+  <span style="color:#a6e22e">geom_text</span>(<span style="color:#a6e22e">aes</span>(label<span style="color:#f92672">=</span>Change),nudge_y <span style="color:#f92672">=</span> <span style="color:#ae81ff">-2.5</span>,colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;white&#34;</span>,size<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)<span style="color:#f92672">+</span> 
+  <span style="color:#a6e22e">labs</span>(title<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Pareto Chart&#34;</span>,y<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Population Change (million people)&#34;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme_bw</span>(base_size <span style="color:#f92672">=</span> <span style="color:#ae81ff">13</span>,base_family <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;serif&#34;</span>) <span style="color:#75715e">#sans= Arial, mono= Courier, serif= Times New Roman</span>
+p
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># This is nearly perfect yet the legend is not showing in our figure so we can add it ourselfs</span>
+<span style="color:#75715e"># first, we will need need to have a data set that can be used to add a legend to the figure</span>
+legend.df<span style="color:#f92672">=</span><span style="color:#a6e22e">data.frame</span>(x<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>,y<span style="color:#f92672">=</span><span style="color:#ae81ff">130</span>,label<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Cumulative Change&#34;</span>) <span style="color:#75715e">#data frame required by ggplot2</span>
+ p<span style="color:#f92672">+</span> <span style="color:#a6e22e">geom_point</span>(legend.df,mapping<span style="color:#f92672">=</span><span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>x,y<span style="color:#f92672">=</span>y),colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;red&#34;</span>,size<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>,shape<span style="color:#f92672">=</span><span style="color:#ae81ff">15</span>)<span style="color:#f92672">+</span> <span style="color:#75715e">#point </span>
+   <span style="color:#a6e22e">geom_text</span>(legend.df,mapping<span style="color:#f92672">=</span><span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>x,y<span style="color:#f92672">=</span>y,label<span style="color:#f92672">=</span>label),
+             hjust<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;left&#34;</span>, <span style="color:#75715e">#text starts from the x,y place</span>
+             nudge_x <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.2</span>, <span style="color:#75715e">#add some gap btw the point and the text along the x axis</span>
+             colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;black&#34;</span>)<span style="color:#f92672">+</span> <span style="color:#75715e">#text colour</span>
+   <span style="color:#a6e22e">annotate</span>(<span style="color:#e6db74">&#34;rect&#34;</span>,xmin<span style="color:#f92672">=</span><span style="color:#ae81ff">0.8</span>,xmax<span style="color:#f92672">=</span><span style="color:#ae81ff">1.2</span>,ymax<span style="color:#f92672">=</span><span style="color:#ae81ff">127</span>,ymin<span style="color:#f92672">=</span><span style="color:#ae81ff">133</span>,alpha<span style="color:#f92672">=</span><span style="color:#ae81ff">0.2</span>) <span style="color:#75715e">#build a box to avoid confusion</span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<p>Here we clearly have full control of the elements of the plot. It may look like a lot of work now but once you get familiar with the sentence functions and elements it will be easier and of course, that will be very useful because many plots will use the same coding structure in the R universe. Now, despite it takes more than a few clicks to get our Pareto Chart in you added more knowledge like:</p>
+<ul>
+<li>Order data sets by different variables.</li>
+<li>Add a second y-axis.</li>
+<li>Change the labels, breaks of the axis (for x axis just replace y with x).</li>
+<li>Give better axis labels.</li>
+<li>Add text inside figures and for each level of the category.</li>
+<li>Change the theme of plots.</li>
+<li>Change the text font family, colour, and size.</li>
+<li>Add points text rectagles to build special legends.</li>
+</ul>
+<h2 id="histograms">Histograms</h2>
+<p>Histograms help you to visualize the approximate distribution of your data. It is similar to the bar plot but we can change the number of <code>bins</code> that we want to display, depending on the number of observations we may need more or less. The default number of bins is 30, here, will do the job for large data sets, while small data sets can use a smaller <code>bins</code> to avoid gaphs. We will use <code>geom_histogram</code> and other parameters depending on your needs.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>(diamonds,<span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>price))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_histogram</span>(bins <span style="color:#f92672">=</span> <span style="color:#ae81ff">45</span>,fill<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;steelblue&#34;</span>,colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;black&#34;</span>)
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<p>We have other options like <code>binwidth</code> which defines the width of each bin to the selected value in units of x. In the example above we said to draw 45 bins and now we want as many bins as long each is 2 x units.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(UsingR) # get the data set</span>
+<span style="color:#a6e22e">library</span>(UsingR)
+<span style="color:#a6e22e">ggplot</span>(father.son, <span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> fheight<span style="color:#f92672">*</span><span style="color:#ae81ff">2.54</span>)) <span style="color:#f92672">+</span>      <span style="color:#75715e"># units transforamtion                     </span>
+  <span style="color:#a6e22e">geom_histogram</span>(<span style="color:#a6e22e">aes</span>(y <span style="color:#f92672">=</span> ..density..),fill<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;grey80&#34;</span>,binwidth <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">+</span>  <span style="color:#75715e">#bins each 2cm height</span>
+  <span style="color:#a6e22e">geom_density</span>()<span style="color:#f92672">+</span> <span style="color:#75715e">#density distribution on top of the histograms</span>
+  <span style="color:#a6e22e">theme_light</span>()
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<h2 id="box-plots">Box plots</h2>
+<p>They are great ways to represent the distribution of the data. Boxplots are extremely good at that as we can easily see the median, interquartile range (IQR), minimum, maximum values as well as any outlier presented in the data.</p>
+<p>We will plot the height of the characters from Star Wars saga grouped by their genders</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(&#34;tidyverse&#34;)</span>
+<span style="color:#75715e">#install.packages(&#34;ggsci&#34;)</span>
+<span style="color:#a6e22e">library</span>(tidyverse)
+<span style="color:#a6e22e">library</span>(ggsci) <span style="color:#75715e">#many colour palette</span>
+<span style="color:#a6e22e">ggplot</span>(starwars, <span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> gender, y <span style="color:#f92672">=</span> height)) <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_boxplot</span>(<span style="color:#a6e22e">aes</span>(fill<span style="color:#f92672">=</span>gender))<span style="color:#f92672">+</span> <span style="color:#75715e"># fill each boxplot by gender </span>
+  <span style="color:#a6e22e">scale_fill_aaas</span>(alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.8</span>) <span style="color:#75715e"># add some transparency to the fill colour 0.2</span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<h2 id="qq-plot">QQ plot</h2>
+<p>Lastly, one very important scatter plot uses the function <code>geom_qq</code> which creates QQ plots to check the normality of the data, it compares the empirical distribution to a theoretical one. Use <code>geom_qq()</code> and <code>geom_qq_line()</code> and the <code>**sample= variable**</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(gcookbook)</span>
+<span style="color:#75715e">#install.packages(gapminder)</span>
+<span style="color:#a6e22e">library</span>(gcookbook)
+<span style="color:#a6e22e">library</span>(gapminder)
+<span style="color:#75715e">#normally distributed</span>
+<span style="color:#a6e22e">ggplot</span>(heightweight, <span style="color:#a6e22e">aes</span>(sample <span style="color:#f92672">=</span> heightIn)) <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq</span>() <span style="color:#f92672">+</span> <span style="color:#75715e">#points </span>
+  <span style="color:#a6e22e">geom_qq_line</span>() <span style="color:#75715e">#line</span>
+
+<span style="color:#75715e">#not normally distributed </span>
+<span style="color:#a6e22e">ggplot</span>(gapminder, <span style="color:#a6e22e">aes</span>(sample <span style="color:#f92672">=</span> lifeExp)) <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq</span>() <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq_line</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">facet_wrap</span>(.~continent,nrow <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme_test</span>()
+</code></pre></div><!-- raw HTML omitted -->
+<p>with <code>facet_*</code> we can separate the data and have different groups and many different graphs.</p>
+<h2 id="cumulative-distribution-function-cdf">Cumulative Distribution Function (CDF)</h2>
+<p>The cumulative distribution function (CDF) of a real-valued random variable X, or just distribution function of X, evaluated at x, is the probability that X will take a value less than or equal to x.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>(uspopchange,<span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>Change))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_histogram</span>(bins <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>,fill<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;steelblue&#34;</span>,colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;black&#34;</span>) 
+<span style="color:#75715e">#graphs shows some skewness </span>
+<span style="color:#75715e">#install.packages(&#34;spatstat&#34;)</span>
+ <span style="color:#a6e22e">library</span>(spatstat)
+ b <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">density</span>(<span style="color:#a6e22e">runif</span>(uspopchange<span style="color:#f92672">$</span>Change)) <span style="color:#75715e">#need to transform the data to </span>
+ f <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">CDF</span>(b) <span style="color:#75715e"># calculate the CDF of the population change in america</span>
+ <span style="color:#a6e22e">plot</span>(f) <span style="color:#75715e"># does not follow a normal distribution we should do some transformations</span>
+</code></pre></div><p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<h2 id="correlation-plot--corelogram">Correlation plot &amp; Corelogram</h2>
+<p>Correlations are something we will need the majority of the time. They will help you to visualize the relationship between your variables. Yet, correlations are not the final answer to your hypothesis, many things in the natural world are correlated, therefore, you need to remember that <strong>correlation is not causation</strong>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#install.packages(&#34;psych&#34;)</span>
+<span style="color:#75715e">#if (!requireNamespace(&#34;devtools&#34;)) install.packages(&#34;devtools&#34;) # if new to R run this line too, you will be able to obtain some packages created by the comunity </span>
+<span style="color:#75715e">#devtools::install_github(&#34;caijun/ggcorrplot2&#34;) #cor plot package</span>
+<span style="color:#a6e22e">library</span>(psych)
+<span style="color:#a6e22e">library</span>(ggcorrplot2)
+<span style="color:#75715e">#get correlation test</span>
+correlation.test <span style="color:#f92672">&lt;-</span> psych<span style="color:#f92672">::</span><span style="color:#a6e22e">corr.test</span>(mtcars[,<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">3</span>,<span style="color:#ae81ff">5</span><span style="color:#f92672">:</span><span style="color:#ae81ff">7</span>)],use <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;pairwise&#34;</span>,method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;spearman&#34;</span>)
+my.correlation<span style="color:#f92672">&lt;-</span>correlation.test<span style="color:#f92672">$</span>r <span style="color:#75715e"># from the test get ($) the correlation values</span>
+p.values.correlation<span style="color:#f92672">&lt;-</span>correlation.test<span style="color:#f92672">$</span>p <span style="color:#75715e"># from the test get ($) the correlation p values</span>
+
+<span style="color:#a6e22e">ggcorrplot.mixed</span>(my.correlation, <span style="color:#75715e">#values in a matrix format</span>
+                 upper <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;circle&#34;</span>, <span style="color:#75715e">#the upper part use circles</span>
+                 lower <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;number&#34;</span>,  <span style="color:#75715e">#the lower part with numbers</span>
+                 p.mat <span style="color:#f92672">=</span> p.values.correlation, <span style="color:#75715e"># use the pvalues stored in p.values.correlation</span>
+                 insig <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;label_sig&#34;</span>,  <span style="color:#75715e">#label the sig correlations</span>
+                 sig.lvl <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0.05</span>, <span style="color:#ae81ff">0.01</span>, <span style="color:#ae81ff">0.001</span>)) <span style="color:#75715e">#it will use * so we set the levels</span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggcorrplot</span>(my.correlation, 
+                 method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;square&#34;</span>, 
+                 type<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;lower&#34;</span>,
+                 p.mat <span style="color:#f92672">=</span> p.values.correlation, 
+                 insig <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;pch&#34;</span>, <span style="color:#75715e">#use a cross for the non sig correlations</span>
+                  show.diag <span style="color:#f92672">=</span> F, <span style="color:#75715e">#remove the diagonal correlations</span>
+                 sig.lvl <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0.05</span>))
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<ul>
+<li>Correlations are obtained by using  <code>psych::corr.test()</code>. Here you will have a correlation and the p-value of each correlation</li>
+<li>There are a few options for the correlation plots: <code>ggcorrplot</code> or <code>ggcorrplot.mixed</code>.</li>
+<li>Here, we added <code>p.mat= p.values.correlation</code> which has the correlation p-values to do different options. In the first we set significant levels to draw asterics in the correlations. In the second graph, we set set the significant level of 0.05 any value bigger than that it will be marked with an x <code>pch</code>. We can also remove the nonsignificant correlations by setting <code>insig=&quot;blank&quot;</code></li>
+</ul>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-179273490-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+

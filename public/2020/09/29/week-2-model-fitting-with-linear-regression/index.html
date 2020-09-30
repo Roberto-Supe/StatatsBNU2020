@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.75.1" />
+
+
+<title>Week 2: Model Fitting with Linear Regression - BNU-Statistics with R</title>
+<meta property="og:title" content="Week 2: Model Fitting with Linear Regression - BNU-Statistics with R">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdn.bootcss.com/highlight.js/9.11.0/styles/foundation.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.jpg"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/Roberto-Supe">GitHub</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">15 min read</span>
+    
+
+    <h1 class="article-title">Week 2: Model Fitting with Linear Regression</h1>
+
+    
+    <span class="article-date">2020-09-29</span>
+    
+
+    <div class="article-content">
+      <p>This week we will cover data summaries, data structure, linear regression and its assumptions.</p>
+<p>At the beginning of each session we will need to load our libraries, so let&rsquo;s load the packages for this week</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(tidyverse)
+<span style="color:#a6e22e">library</span>(plotrix)
+<span style="color:#a6e22e">library</span>(ggpubr) <span style="color:#75715e">#install.packages(&#34;ggpubr&#34;)</span>
+<span style="color:#a6e22e">library</span>(qqplotr) <span style="color:#75715e">#install.packages(&#34;qqplotr&#34;)</span>
+<span style="color:#a6e22e">library</span>(PerformanceAnalytics)<span style="color:#75715e">#install.packages(&#34;PerformanceAnalytics&#34;)</span>
+<span style="color:#a6e22e">library</span>(gcookbook)
+<span style="color:#a6e22e">library</span>(tidyr) <span style="color:#75715e">#install.packages(&#34;tidyr&#34;)  </span>
+</code></pre></div><h1 id="sample-statistics-and-summary-results">Sample Statistics and Summary results</h1>
+<p>Mean, variance, and error values are always required for the final report. It can take a while to sort the data in the right way and several times you may want to check how your data looks frequently. <code>Tydiverse</code> is a complex group of packages that include <code>ggplot2</code> and <code>dplyr</code>. Adding, changing, combining, removing is simple with <code>dplyr</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">data</span>(<span style="color:#e6db74">&#34;storms&#34;</span>)
+<span style="color:#a6e22e">head</span>(storms) <span style="color:#75715e">#look at the first 6 rows</span>
+</code></pre></div><pre><code>## # A tibble: 6 x 13
+##   name   year month   day  hour   lat  long status category  wind pressure
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;ord&gt;    &lt;int&gt;    &lt;int&gt;
+## 1 Amy    1975     6    27     0  27.5 -79   tropi~ -1          25     1013
+## 2 Amy    1975     6    27     6  28.5 -79   tropi~ -1          25     1013
+## 3 Amy    1975     6    27    12  29.5 -79   tropi~ -1          25     1013
+## 4 Amy    1975     6    27    18  30.5 -79   tropi~ -1          25     1013
+## 5 Amy    1975     6    28     0  31.5 -78.8 tropi~ -1          25     1012
+## 6 Amy    1975     6    28     6  32.4 -78.7 tropi~ -1          25     1012
+## # ... with 2 more variables: ts_diameter &lt;dbl&gt;, hu_diameter &lt;dbl&gt;
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">mean</span>(storms<span style="color:#f92672">$</span>wind) <span style="color:#75715e"># mean wind speed of all the recored storms</span>
+</code></pre></div><pre><code>## [1] 53.495
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">sd</span>(storms<span style="color:#f92672">$</span>pressure) <span style="color:#75715e"># pressure standard deviation of all the recored storms</span>
+</code></pre></div><pre><code>## [1] 19.51678
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">plotrix<span style="color:#f92672">::</span><span style="color:#a6e22e">std.error</span>(storms<span style="color:#f92672">$</span>ts_diameter) <span style="color:#75715e"># standard error of storm eye diameter </span>
+</code></pre></div><pre><code>## [1] 2.394685
+</code></pre><p>I am sure that you are familiar with that as it is something we can get from any statistical program, now, let&rsquo;s look at how to deal with more information and different results.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#library(tidyverse)</span>
+storms[,<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">11</span>)]<span style="color:#f92672">%&gt;%</span> <span style="color:#75715e">#dataset and variables we will work with [row,column] use c(for selecting multiple columns)</span>
+  dplyr<span style="color:#f92672">::</span><span style="color:#a6e22e">group_by</span>(name,year)<span style="color:#f92672">%&gt;%</span> <span style="color:#75715e">#group by name and year</span>
+  dplyr<span style="color:#f92672">::</span><span style="color:#a6e22e">summarise_all</span>(<span style="color:#a6e22e">funs</span>(<span style="color:#a6e22e">mean</span>(.,na.rm <span style="color:#f92672">=</span> T), <span style="color:#75715e">#use funs( to get multiple stimators)</span>
+                           <span style="color:#a6e22e">sd</span>(.),
+                           <span style="color:#a6e22e">var</span>(.), <span style="color:#75715e">#sd^2</span>
+                           plotrix<span style="color:#f92672">::</span><span style="color:#a6e22e">std.error</span>(.),
+                           observations<span style="color:#f92672">=</span><span style="color:#a6e22e">length</span>(.))) <span style="color:#75715e"># we can name the variables directly  length tells you how many observations in each group</span>
+</code></pre></div><pre><code>## # A tibble: 426 x 12
+## # Groups:   name [198]
+##    name   year wind_mean pressure_mean wind_sd pressure_sd wind_var pressure_var
+##    &lt;chr&gt; &lt;dbl&gt;     &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;        &lt;dbl&gt;
+##  1 AL01~  1993      27.5         1000.    2.67       1.55      7.14        2.41 
+##  2 AL01~  2000      25           1009.    0          0.957     0           0.917
+##  3 AL02~  1992      29           1007.    2.24       0.894     5           0.8  
+##  4 AL02~  1994      24.2         1016.    5.85       0.753    34.2         0.567
+##  5 AL02~  1999      28.8         1005.    2.5        0.957     6.25        0.917
+##  6 AL02~  2000      29.2         1009.    1.95       0.515     3.79        0.265
+##  7 AL02~  2001      25           1011     0          0.707     0           0.5  
+##  8 AL02~  2003      30           1009.    0          0.957     0           0.917
+##  9 AL02~  2006      38           1002.    5.70       4.04     32.5        16.3  
+## 10 AL03~  1987      21.2         1010.    8.71       2.44     75.8         5.97 
+## # ... with 416 more rows, and 4 more variables:
+## #   `wind_plotrix::std.error` &lt;dbl&gt;, `pressure_plotrix::std.error` &lt;dbl&gt;,
+## #   wind_observations &lt;int&gt;, pressure_observations &lt;int&gt;
+</code></pre><ul>
+<li><strong>group_by</strong> is one of the best elements of dplyr, it works by making one data set for all the information you add in group_by(). Here, we group all the storms with the same name, if there are multiple elements then we group them again by year. In the output you will see there is &lsquo;Groups: name [198]` this means that there are 198 names, some with multiple years so we get a data set with 426 rows.</li>
+<li><strong>summarise_all</strong> means that all the functions will be applied to all the variables excluded from <code>group_by</code>.</li>
+<li><strong>na.rm</strong> and <strong>&rsquo;.'</strong>: The <code>.</code> means take all the information as it is no changes. <code>na.rm=T</code> means TRUE (yes) to remove missing values if there are some</li>
+</ul>
+<p>You want to know if there is a relationship between wind and pressure so we need to visualize both variables in a scatter plot.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">data</span>(<span style="color:#e6db74">&#34;storms&#34;</span>) <span style="color:#75715e">#we will work with the dataset: Carbon Dioxide Uptake in Grass Plants</span>
+<span style="color:#a6e22e">tail</span>(storms,<span style="color:#ae81ff">4</span>) <span style="color:#75715e">#show me the last 4 observations </span>
+</code></pre></div><pre><code>## # A tibble: 4 x 13
+##   name   year month   day  hour   lat  long status category  wind pressure
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;ord&gt;    &lt;int&gt;    &lt;int&gt;
+## 1 Kate   2015    11    11     0  33.1 -71.3 hurri~ 1           65      990
+## 2 Kate   2015    11    11     6  35.2 -67.6 hurri~ 1           70      985
+## 3 Kate   2015    11    11    12  36.2 -62.5 hurri~ 1           75      980
+## 4 Kate   2015    11    11    18  37.6 -58.2 hurri~ 1           65      980
+## # ... with 2 more variables: ts_diameter &lt;dbl&gt;, hu_diameter &lt;dbl&gt;
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># we will begin by ploting the variables of our hypothesis</span>
+<span style="color:#a6e22e">ggplot</span>(storms,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>wind,y<span style="color:#f92672">=</span>pressure))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_point</span>()
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<p>Looks like there is some sort of relationship, negative relationship, between our variables of interest. However, we need statistical models to determine the changes in pressure with wing and how significant are those changes.</p>
+<h1 id="least-squares-linear-regression">Least squares Linear Regression:</h1>
+<p>The least squares method also deffined as the <em>line of best fit</em> aims to produce a model that reduces the *variation *or <em>error</em> between the expected and predicted values. Next, we will run a simple linear regression with <code>lm</code> with our two variables to understand this concept and the estimation of model parameters which are often called <strong>ordinary least squares estimates</strong>. The previous scatter looked roughly linear, so let&rsquo;s examine their relationship.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">fit.lm<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">lm</span>(pressure<span style="color:#f92672">~</span>wind, data <span style="color:#f92672">=</span> storms) <span style="color:#75715e"># y~x makes sure to use this `~`</span>
+fit.lm <span style="color:#75715e">#information inside fit.lm</span>
+</code></pre></div><pre><code>## 
+## Call:
+## lm(formula = pressure ~ wind, data = storms)
+## 
+## Coefficients:
+## (Intercept)         wind  
+##   1029.6670      -0.7015
+</code></pre><p>Equation for the LSLR: 1029.66 - 0.7015x</p>
+<p>We can also add the error term by using <code>sigma</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">sigma</span>(fit.lm) <span style="color:#75715e"># residual standard deviation E</span>
+</code></pre></div><pre><code>## [1] 6.536737
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">confint</span>(fit.lm) <span style="color:#75715e"># get confidence intervals for all the terms</span>
+</code></pre></div><pre><code>##                    2.5 %       97.5 %
+## (Intercept) 1029.3759591 1029.9580714
+## wind          -0.7064102   -0.6966387
+</code></pre><p>Therefore, the equation for the LSLR with a CI of 95% confidence level will be: 1029.66 - 0.7015x <code>\(\pm\)</code> 6.537.</p>
+<h2 id="confidence-intervals-ci">Confidence Intervals (CI)</h2>
+<p>They are values that also represent the accuracy of our sample mean. This will show a range of plausible values not only for the mean but for any unknown parameter.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">labels<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data.frame</span>(label<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;99%&#34;</span>,<span style="color:#e6db74">&#34;95%&#34;</span>,<span style="color:#e6db74">&#34;90%&#34;</span>,<span style="color:#e6db74">&#34;90%&#34;</span>,<span style="color:#e6db74">&#34;95%&#34;</span>,<span style="color:#e6db74">&#34;99%&#34;</span>),
+          x<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">-2.326348</span>,<span style="color:#ae81ff">-1.644854</span>,<span style="color:#ae81ff">-1.281552</span>,<span style="color:#ae81ff">1.281552</span>,<span style="color:#ae81ff">1.644854</span>,<span style="color:#ae81ff">2.326348</span>),
+          y<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0.03</span>,<span style="color:#ae81ff">0.105</span>,<span style="color:#ae81ff">0.18</span>,<span style="color:#ae81ff">0.18</span>,<span style="color:#ae81ff">0.105</span>,<span style="color:#ae81ff">0.03</span>))
+<span style="color:#a6e22e">ggplot</span>(<span style="color:#66d9ef">NULL</span>, <span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">-4</span>, <span style="color:#ae81ff">4</span>))) <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,
+    geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;grey10&#34;</span>,alpha <span style="color:#f92672">=</span> <span style="color:#ae81ff">.3</span>) <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_vline</span>(xintercept <span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>,colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;black&#34;</span>,linetype<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;dotted&#34;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,
+    geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;steelblue&#34;</span>,
+    xlim <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#f92672">-</span><span style="color:#a6e22e">qnorm</span>(<span style="color:#ae81ff">.90</span>), <span style="color:#ae81ff">-4</span>))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;steelblue&#34;</span>,xlim <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#a6e22e">qnorm</span>(<span style="color:#ae81ff">.90</span>), <span style="color:#ae81ff">4</span>))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;tomato&#34;</span>,xlim <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#a6e22e">qnorm</span>(<span style="color:#ae81ff">.95</span>), <span style="color:#ae81ff">4</span>))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;tomato&#34;</span>,xlim <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#f92672">-</span><span style="color:#a6e22e">qnorm</span>(<span style="color:#ae81ff">.95</span>), <span style="color:#ae81ff">-4</span>))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;forestgreen&#34;</span>,xlim <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#a6e22e">qnorm</span>(<span style="color:#ae81ff">.99</span>), <span style="color:#ae81ff">4</span>))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_function</span>(fun <span style="color:#f92672">=</span> dnorm,geom <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;area&#34;</span>,fill <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;forestgreen&#34;</span>,xlim <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#f92672">-</span><span style="color:#a6e22e">qnorm</span>(<span style="color:#ae81ff">.99</span>), <span style="color:#ae81ff">-4</span>))<span style="color:#f92672">+</span>
+  ggrepel<span style="color:#f92672">::</span><span style="color:#a6e22e">geom_text_repel</span>(data<span style="color:#f92672">=</span>labels,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>x,y<span style="color:#f92672">=</span>y,label<span style="color:#f92672">=</span>label),nudge_y <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.1</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">annotate</span>(<span style="color:#e6db74">&#34;text&#34;</span>,x<span style="color:#f92672">=</span><span style="color:#ae81ff">-3.5</span>,y<span style="color:#f92672">=</span><span style="color:#ae81ff">0.3</span>,label<span style="color:#f92672">=</span><span style="color:#a6e22e">paste0</span>(<span style="color:#e6db74">&#34;N(&#34;</span>,<span style="color:#e6db74">&#34;\u03BC&#34;</span>,<span style="color:#e6db74">&#34;,&#34;</span>,<span style="color:#e6db74">&#34;\u03C3&#34;</span>,<span style="color:#e6db74">&#34;\u00B2&#34;</span>, <span style="color:#e6db74">&#34;)&#34;</span>),size<span style="color:#f92672">=</span><span style="color:#ae81ff">6</span>,fontface <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;italic&#39;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">labs</span>(title <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Normal Distribution&#34;</span>,x <span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>,y <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;f(x)&#34;</span>) <span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">scale_x_continuous</span>(breaks <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">-2.326348</span>,<span style="color:#ae81ff">-1.644854</span>,<span style="color:#ae81ff">-1.281552</span>,<span style="color:#ae81ff">0</span>,<span style="color:#ae81ff">1.281552</span>,<span style="color:#ae81ff">1.644854</span>,<span style="color:#ae81ff">2.326348</span>),
+                     labels <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#a6e22e">paste0</span>(<span style="color:#e6db74">&#34;\u03BC&#34;</span>,<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">-3</span>,<span style="color:#ae81ff">-2</span>,<span style="color:#ae81ff">-1</span>),<span style="color:#e6db74">&#34;\u03C3&#34;</span>),<span style="color:#e6db74">&#34;\u03BC&#34;</span>,<span style="color:#a6e22e">paste0</span>(<span style="color:#e6db74">&#34;\u03BC&#34;</span>,<span style="color:#e6db74">&#34;\u002B&#34;</span>,<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">3</span>),<span style="color:#e6db74">&#34;\u03C3&#34;</span>)))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">scale_y_continuous</span>(expand <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>))<span style="color:#f92672">+</span> <span style="color:#75715e"># no space at the top/bottom</span>
+  <span style="color:#a6e22e">theme_bw</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme</span>(panel.grid <span style="color:#f92672">=</span> <span style="color:#a6e22e">element_blank</span>(), <span style="color:#75715e"># remove grid lines </span>
+        axis.text.x <span style="color:#f92672">=</span> <span style="color:#a6e22e">element_text</span>(colour<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;black&#34;</span>), <span style="color:#75715e"># text of x axis black</span>
+        axis.text.y <span style="color:#f92672">=</span><span style="color:#a6e22e">element_blank</span>(), <span style="color:#75715e">#remove the labels of y axis</span>
+        axis.ticks.y <span style="color:#f92672">=</span> <span style="color:#a6e22e">element_blank</span>()) <span style="color:#75715e">#remove the ticks on y axis only</span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<p>As we increase our confidence interval we are more likely to include the true value of the parameter.</p>
+<h2 id="coefficient-of-determination">Coefficient of determination</h2>
+<p>In our regression model, the coefficient of determination is calculated by diving the quotient of the variances of the fitted values and observed values of the dependent variable. This tells us <strong>how much of the variation of y is explain by the model</strong> or how well the model fits the data. It is important that you look at the adjusted R-square when fitting a multiple regression because it deals with any noise created by adding more variables.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">results<span style="color:#f92672">=</span>base<span style="color:#f92672">::</span><span style="color:#a6e22e">summary</span>(fit.lm) <span style="color:#75715e">#save all the summary in a large summary</span>
+results<span style="color:#f92672">$</span>r.squared <span style="color:#75715e">#take the coefficient of determination</span>
+</code></pre></div><pre><code>## [1] 0.8878337
+</code></pre><p>The model explains 88.78% of the variation in pressure.</p>
+<h1 id="simple-linear-regression">Simple Linear Regression</h1>
+<p>The regression model was done and we needed to know how significant those results are. However, before we begin, it is important that you check the data before regression and any other model that you run. By this, it is meant that we should determine something like the normality of the data. There are multiple tests and if not normally distributed,  we will need to transform the data.</p>
+<h2 id="assumption-one-normality">Assumption One (Normality)</h2>
+<p>Use <code>shapiro.test</code> to carry out the normality test, here, the H0 is that data is normally distributed. P-Values &gt;0.05 will support this normal distribution of your variable.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#library(gcookbook) #data set</span>
+<span style="color:#a6e22e">library</span>(gcookbook)
+<span style="color:#a6e22e">data</span>(<span style="color:#e6db74">&#34;heightweight&#34;</span>)
+<span style="color:#a6e22e">shapiro.test</span>(heightweight<span style="color:#f92672">$</span>heightIn) <span style="color:#75715e"># normality test passed</span>
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  heightweight$heightIn
+## W = 0.99628, p-value = 0.849
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shapiro.test</span>(iris<span style="color:#f92672">$</span>Sepal.Length) <span style="color:#75715e"># normality test failed</span>
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  iris$Sepal.Length
+## W = 0.97609, p-value = 0.01018
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shapiro.test</span>(<span style="color:#a6e22e">log</span>(iris<span style="color:#f92672">$</span>Sepal.Length)) <span style="color:#75715e"># normality test with transformed data passed</span>
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  log(iris$Sepal.Length)
+## W = 0.98253, p-value = 0.05388
+</code></pre><p>Clearly, we can make more sense of the data when we plot it. This will be useful when you got a lot of variables.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e"># not transformed data</span>
+<span style="color:#a6e22e">ggplot</span>(data<span style="color:#f92672">=</span>iris,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(sample<span style="color:#f92672">=</span>Sepal.Length))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq_line</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme_bw</span>()
+<span style="color:#75715e">#plot with transformed data and an alternative package to ggplot2 </span>
+ggpubr<span style="color:#f92672">::</span><span style="color:#a6e22e">ggqqplot</span>(<span style="color:#a6e22e">log</span>(iris<span style="color:#f92672">$</span>Sepal.Length)) <span style="color:#75715e"># set the variable that you want to get the qqplot</span>
+</code></pre></div><p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<ul>
+<li>
+<p>Data transformation resulted in a better qq-plot. Now we can see why it passed <code>shapiro.test</code>.</p>
+</li>
+<li>
+<p>We used two options, one plot with the normal ggplot2 and the second one with the package <code>ggpubr</code>. The last is a package that reduces ggplot2 lines of code and gives you great results. If you work with small data sets and you want to have good graphs it is a great option. We will cover more about this package in a few weeks.</p>
+</li>
+</ul>
+<p>Let&rsquo;s build a data set for our regressions and model:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#library(qqplotr)</span>
+<span style="color:#a6e22e">set.seed</span>(<span style="color:#ae81ff">15</span>)
+df<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data.frame</span>(temperature<span style="color:#f92672">=</span><span style="color:#a6e22e">rnorm</span>(<span style="color:#ae81ff">100</span>,mean <span style="color:#f92672">=</span> <span style="color:#ae81ff">25</span>,sd<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span>),
+               wind<span style="color:#f92672">=</span><span style="color:#a6e22e">rnorm</span>(<span style="color:#ae81ff">100</span>,mean <span style="color:#f92672">=</span> <span style="color:#ae81ff">10</span>,sd<span style="color:#f92672">=</span><span style="color:#ae81ff">1.2</span>),
+               radiation<span style="color:#f92672">=</span><span style="color:#a6e22e">rnorm</span>(<span style="color:#ae81ff">100</span>,mean <span style="color:#f92672">=</span> <span style="color:#ae81ff">5000</span>,sd<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>),
+               bacterias<span style="color:#f92672">=</span><span style="color:#a6e22e">rnorm</span>(<span style="color:#ae81ff">100</span>,mean <span style="color:#f92672">=</span> <span style="color:#ae81ff">50</span>,sd<span style="color:#f92672">=</span><span style="color:#ae81ff">24.22</span>),
+               groups<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;Day&#34;</span>,<span style="color:#e6db74">&#34;Night&#34;</span>))
+<span style="color:#a6e22e">head</span>(df) 
+</code></pre></div><pre><code>##   temperature      wind radiation bacterias groups
+## 1    27.07058  9.951969  5818.690  55.49904    Day
+## 2    39.64897  9.964412  4938.840  29.82846  Night
+## 3    22.28305  8.550304  5527.404  38.30339    Day
+## 4    32.17759 11.758406  4995.665  60.15574  Night
+## 5    28.90413 11.294930  5228.475  42.19714    Day
+## 6    14.95691  9.598272  3894.247  85.30897  Night
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shapiro.test</span>(df<span style="color:#f92672">$</span>radiation) <span style="color:#75715e"># normal distribution</span>
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  df$radiation
+## W = 0.96947, p-value = 0.02012
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shapiro.test</span>(df<span style="color:#f92672">$</span>wind) <span style="color:#75715e"># normal distribution</span>
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  df$wind
+## W = 0.97584, p-value = 0.06274
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shapiro.test</span>(df<span style="color:#f92672">$</span>temperature) <span style="color:#75715e">#normal distribution</span>
+</code></pre></div><pre><code>## 
+## 	Shapiro-Wilk normality test
+## 
+## data:  df$temperature
+## W = 0.992, p-value = 0.8216
+</code></pre><h2 id="assumption-two-linearity">Assumption two (Linearity)</h2>
+<p>The relationship between the independent and dependent variables must be linear. A scatter plot is our alternative to test if there is a linear distribution that would show our points is something like a straight line.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>(df,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(x<span style="color:#f92672">=</span>temperature,y<span style="color:#f92672">=</span>bacterias))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_point</span>()
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<ul>
+<li>
+<p>There is no clear linearity but you can see that data is showing a slightly decreasing trend.</p>
+</li>
+<li>
+<p>Now that all the variables are normally distributed and there is a linear relationship we can use them in our regression.</p>
+</li>
+</ul>
+<p><em>Null hypothesis (H0):</em> There is no change in bacteria population with temperature, radiation,etc.</p>
+<p><em>Alternative hypothesis (H1):</em> Bacteria population changes with temperature, radiation,etc.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">fit.lm<span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">lm</span>(bacterias<span style="color:#f92672">~</span>temperature,data<span style="color:#f92672">=</span>df)
+<span style="color:#a6e22e">summary</span>(fit.lm)
+</code></pre></div><pre><code>## 
+## Call:
+## lm(formula = bacterias ~ temperature, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -49.153 -16.873   1.069  16.100  54.899 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  72.4498     7.9532   9.110 1.04e-14 ***
+## temperature  -0.7300     0.2945  -2.478   0.0149 *  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 23.3 on 98 degrees of freedom
+## Multiple R-squared:  0.05898,	Adjusted R-squared:  0.04938 
+## F-statistic: 6.142 on 1 and 98 DF,  p-value: 0.01491
+</code></pre><p>Breakdown of the elements of the results summary:</p>
+<ul>
+<li>
+<p>The estimates <code>(Estimate)</code> is the <em>change</em> in y caused by each element of the regression. (Intercept) or the value of the y-intercept (in this case 60.7266) is the calculated value of y when x is 0. <code>temperature or any x variabel</code> values in the <code>Estimate</code> column show changes in y (e.g. population of bacteria) with one unit increase in <code>x</code>. Therefore, for the temperature group, we could say that the bacteria population gets reduced by -0.22 units for each increment in temperature if Pr(&gt;|t|) &lt; 0.05. Here it is not the case so we can not reach that conclusion.</p>
+</li>
+<li>
+<p>The standard error of the estimated values are in the second column <code>Std. Error</code>.</p>
+</li>
+<li>
+<p>The test statistic showed under <code>t value</code>.</p>
+</li>
+<li>
+<p>The p-value <code>Pr(&gt;| t | )</code>, the probability of finding the given t-statistic by chance and therefore, the calculated <code>estimate</code> for that variable.</p>
+</li>
+</ul>
+<p>We can see that the bacteria population did not change with temperature (P-value&gt;0.05). Let&rsquo;s see how radiation affects our bacteria population</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">fit.lm<span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">lm</span>(bacterias<span style="color:#f92672">~</span>radiation,data<span style="color:#f92672">=</span>df)
+<span style="color:#a6e22e">summary</span>(fit.lm)
+</code></pre></div><pre><code>## 
+## Call:
+## lm(formula = bacterias ~ radiation, data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -48.910 -17.761  -0.201  13.905  58.504 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 64.030405  11.503156   5.566 2.27e-07 ***
+## radiation   -0.002119   0.002287  -0.927    0.356    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 23.92 on 98 degrees of freedom
+## Multiple R-squared:  0.008686,	Adjusted R-squared:  -0.001429 
+## F-statistic: 0.8587 on 1 and 98 DF,  p-value: 0.3564
+</code></pre><p>We got similar results so we would conclude that we are 95% confident that radiation and temperature alone do not affect the population of bacterias. 95% confident because we run our model at this CI.</p>
+<h2 id="model-test-assumption--homoscedasticity">Model test assumption  (Homoscedasticity)</h2>
+<p>We should ensure that the model fitted meets this last assumption, the same variance over the range of predicition, to maintain the model. This means that the error term needs to be the same across all values of the independent variables. The fitted model already has all the information that we need for the plots so we will just call <code>plot(model)</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">par</span>(mfrow<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">2</span>)) <span style="color:#75715e">#plot panel to fit 2 by 2 pictures</span>
+<span style="color:#a6e22e">plot</span>(fit.lm) <span style="color:#75715e"># lm result has 4 figures</span>
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">par</span>(mfrow<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>)) <span style="color:#75715e">#we set them back to normal</span>
+</code></pre></div><p>Here we can see that the residual errors are constant across the groups and distributed evenly. Look at the <code>Normal Q-Q</code> (top right) which under homoscedasticity it should show the points along the line.</p>
+<ul>
+<li>This will conclude a simple linear regression model and its analysis.</li>
+</ul>
+<h2 id="extra-notes">Extra Notes</h2>
+<ul>
+<li>When we got a lot of variables, We can do the test in one line of code with <strong>lappy</strong>. Additionally, when you run multiple variables the resulting object is a list (results of the first, results of the second, results of the n) to observe and export all those values or use them in other parts of your documents then we need to unlist and save them in a data frame.</li>
+</ul>
+<h3 id="run-the-same-test-for-each-variable">Run the same test for each variable</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">results<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data.frame</span>(<span style="color:#a6e22e">do.call</span>(rbind,<span style="color:#a6e22e">lapply</span>(df[,<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">3</span>],<span style="color:#a6e22e">function</span>(x) <span style="color:#a6e22e">shapiro.test</span>(x)<span style="color:#a6e22e">[c</span>(<span style="color:#e6db74">&#34;statistic&#34;</span>,<span style="color:#e6db74">&#34;p.value&#34;</span>)])))
+results <span style="color:#75715e"># how the data looks like</span>
+</code></pre></div><pre><code>##             statistic    p.value
+## temperature 0.9920047  0.8215678
+## wind        0.9758363 0.06274086
+## radiation    0.969466 0.02012186
+</code></pre><p>Let&rsquo;s take each element and extract just what we need.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">results<span style="color:#f92672">$</span>statistic<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">unlist</span>(results<span style="color:#f92672">$</span>statistic) <span style="color:#75715e"># remove any text left,the list structure and make it a new vector</span>
+results<span style="color:#f92672">$</span>p.value<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">unlist</span>(results<span style="color:#f92672">$</span>p.value) <span style="color:#75715e">#remove the list structure and make it a new vector</span>
+<span style="color:#a6e22e">str</span>(results) <span style="color:#75715e"># data frame with two numeric variables</span>
+</code></pre></div><pre><code>## 'data.frame':	3 obs. of  2 variables:
+##  $ statistic: num  0.992 0.976 0.969
+##  $ p.value  : num  0.8216 0.0627 0.0201
+</code></pre><p>Most of the time there are multiple options so you can also do something like this too:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#option 2</span>
+allshapiro.tes<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">lapply</span>(df[,<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">3</span>],shapiro.test) <span style="color:#75715e">#as a list apply the function shapiro.test to the variables [,1:3] in the data frame df</span>
+<span style="color:#75715e">#allshapiro.tes # how the data looks like for all the variables</span>
+results<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">data.frame</span>(<span style="color:#a6e22e">t</span>(<span style="color:#a6e22e">sapply</span>(allshapiro.tes,`[`,<span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;statistic&#34;</span>,<span style="color:#e6db74">&#34;p.value&#34;</span>)))) <span style="color:#75715e">#let&#39;s take what we really need </span>
+results<span style="color:#f92672">$</span>statistic<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">unlist</span>(results<span style="color:#f92672">$</span>statistic) <span style="color:#75715e"># remove any text left,the list structure and make it a new vector</span>
+results<span style="color:#f92672">$</span>p.value<span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">unlist</span>(results<span style="color:#f92672">$</span>p.value) <span style="color:#75715e">#remove the list structure and make it a new vector</span>
+<span style="color:#a6e22e">str</span>(results)
+</code></pre></div><pre><code>## 'data.frame':	3 obs. of  2 variables:
+##  $ statistic: num  0.992 0.976 0.969
+##  $ p.value  : num  0.8216 0.0627 0.0201
+</code></pre><h2 id="correlations-histograms-and-scatters-plot-modifications">Correlations, histograms, and scatters plot modifications</h2>
+<p>Here there is a function to get a plot with correlations, scatter plot, and histograms with text over the bins.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">panel.cor <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(x, y, digits <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>, prefix <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>, cex.cor, <span style="color:#66d9ef">...</span>) {
+  usr <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">par</span>(<span style="color:#e6db74">&#34;usr&#34;</span>)
+  <span style="color:#a6e22e">on.exit</span>(<span style="color:#a6e22e">par</span>(usr))
+  <span style="color:#a6e22e">par</span>(usr <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1</span>))
+  r <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">abs</span>(<span style="color:#a6e22e">cor</span>(x, y, use <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;complete.obs&#34;</span>,method <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;pearson&#34;</span>))
+  txt <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">format</span>(<span style="color:#a6e22e">c</span>(r, <span style="color:#ae81ff">0.123456789</span>), digits <span style="color:#f92672">=</span> digits)[1]
+  txt <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">paste</span>(prefix, txt, sep <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>)
+  <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">missing</span>(cex.cor)) cex.cor <span style="color:#f92672">&lt;-</span> <span style="color:#ae81ff">0.8</span><span style="color:#f92672">/</span><span style="color:#a6e22e">strwidth</span>(txt)
+  <span style="color:#a6e22e">text</span>(<span style="color:#ae81ff">0.5</span>, <span style="color:#ae81ff">0.5</span>, txt, cex <span style="color:#f92672">=</span>  cex.cor <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> r) <span style="color:#f92672">/</span> <span style="color:#ae81ff">2</span>)
+}
+
+panel.hist <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(x, <span style="color:#66d9ef">...</span>) {
+  usr <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">par</span>(<span style="color:#e6db74">&#34;usr&#34;</span>)
+  <span style="color:#a6e22e">on.exit</span>(<span style="color:#a6e22e">par</span>(usr))
+  <span style="color:#a6e22e">par</span>(usr <span style="color:#f92672">=</span> <span style="color:#a6e22e">c</span>(usr[1<span style="color:#f92672">:</span><span style="color:#ae81ff">2</span>], <span style="color:#ae81ff">0</span>, <span style="color:#ae81ff">1.5</span>) )
+  h <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">hist</span>(x, plot <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>)
+  breaks <span style="color:#f92672">&lt;-</span> h<span style="color:#f92672">$</span>breaks
+  nB <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">length</span>(breaks)
+  y <span style="color:#f92672">&lt;-</span> h<span style="color:#f92672">$</span>counts
+  y <span style="color:#f92672">&lt;-</span> y<span style="color:#f92672">/</span><span style="color:#a6e22e">max</span>(y)
+  <span style="color:#a6e22e">rect</span>(breaks[<span style="color:#f92672">-</span>nB], <span style="color:#ae81ff">0</span>, breaks[<span style="color:#ae81ff">-1</span>], y, col <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;white&#34;</span>, <span style="color:#66d9ef">...</span>)
+}
+
+df <span style="color:#f92672">%&gt;%</span> <span style="color:#75715e"># your data frame</span>
+  dplyr<span style="color:#f92672">::</span><span style="color:#a6e22e">select</span>(<span style="color:#f92672">-</span>groups) <span style="color:#f92672">%&gt;%</span> <span style="color:#75715e">#remove categorical variables names or numbers if multiple -c()</span>
+  <span style="color:#a6e22e">pairs</span>(
+    upper.panel <span style="color:#f92672">=</span> panel.cor,
+    diag.panel  <span style="color:#f92672">=</span> panel.hist,
+    lower.panel <span style="color:#f92672">=</span> panel.smooth
+  )
+</code></pre></div><p><!-- raw HTML omitted --></p>
+<h2 id="alternative-qqplots">Alternative qqplots</h2>
+<p><code>ggpurb</code> adds a confidence region with the qqplot, we can do that with ggplot2 and the package <code>qqplotr</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(qqplotr) <span style="color:#75715e">#install.packages(&#34;qqplotr&#34;)</span>
+<span style="color:#a6e22e">ggplot</span>(data<span style="color:#f92672">=</span>airquality,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(sample<span style="color:#f92672">=</span>Ozone))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq_line</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">facet_wrap</span>(.~Month,scales <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;free&#34;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme_bw</span>()
+<span style="color:#a6e22e">ggplot</span>(data<span style="color:#f92672">=</span>airquality,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(sample<span style="color:#f92672">=</span>Ozone))<span style="color:#f92672">+</span>
+  <span style="color:#75715e">#geom_qq()+</span>
+  <span style="color:#a6e22e">stat_qq_band</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_qq_line</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">stat_qq_point</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">facet_wrap</span>(.~Month,scales <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;free&#34;</span>)<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">theme_bw</span>()
+<span style="color:#75715e">#values should be inside that grey shadow </span>
+</code></pre></div><p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<h2 id="rearrange-multiple-variables-for-ggplot2">Rearrange multiple variables for ggplot2</h2>
+<p>To use ggplot2 at a more advanced level you need to set a long data format. This means that all your response variables need to be in rows and a grouping in a different variable.
+Let&rsquo;s use the iris dataset once again.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">head</span>(iris)
+</code></pre></div><pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa
+</code></pre><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">iris.long<span style="color:#f92672">&lt;-</span>tidyr<span style="color:#f92672">::</span><span style="color:#a6e22e">gather</span>(data<span style="color:#f92672">=</span>iris,key<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Response_variable&#34;</span>,value<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;observation_value&#34;</span>,<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">4</span>) <span style="color:#75715e">#the numbers represent the columns that you want to make rows. </span>
+<span style="color:#75715e"># lets bring the code from the first graph and change the variables and the data set</span>
+<span style="color:#a6e22e">ggplot</span>(data<span style="color:#f92672">=</span>iris.long,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(sample<span style="color:#f92672">=</span>observation_value))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq_line</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">facet_grid</span>(Response_variable<span style="color:#f92672">~</span>Species,scales <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;free&#34;</span>)<span style="color:#f92672">+</span> <span style="color:#75715e">#y~x</span>
+  <span style="color:#a6e22e">theme_bw</span>()
+
+<span style="color:#75715e"># we got two options for the facets grid and wrap so let&#39;s try facet_wrap to see the differences</span>
+<span style="color:#a6e22e">ggplot</span>(data<span style="color:#f92672">=</span>iris.long,mapping <span style="color:#f92672">=</span> <span style="color:#a6e22e">aes</span>(sample<span style="color:#f92672">=</span>observation_value))<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">geom_qq_line</span>()<span style="color:#f92672">+</span>
+  <span style="color:#a6e22e">facet_wrap</span>(Response_variable<span style="color:#f92672">~</span>Species,scales <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;free&#34;</span>)<span style="color:#f92672">+</span> <span style="color:#75715e">#y~x</span>
+  <span style="color:#a6e22e">theme_bw</span>()
+</code></pre></div><p><!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p>That is a great and fast way to see distributions and you can create many plots at once.</p>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/highlight.min.js"></script>
+
+
+
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/r.min.js"></script>
+<script src="//cdn.bootcss.com/highlight.js/9.11.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-179273490-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+  </body>
+</html>
+
