@@ -4,7 +4,7 @@ title = "BNU-Statistics with R"
 theme = "hugo-lithium"
 googleAnalytics = "UA-179273490-1"
 disqusShortname = ""
-ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_cache$"]
+ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "_cache$"] #html may need the "_files$" to read the images
 [permalinks]
     post = "/:year/:month/:day/:slug/"
 
