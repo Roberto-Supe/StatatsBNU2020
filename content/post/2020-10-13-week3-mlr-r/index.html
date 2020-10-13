@@ -1,0 +1,110 @@
+---
+title: week3-MLR r
+author: Roberto Supe
+date: '2020-10-13'
+slug: week3-mlr-r
+categories: ["R"]
+tags: ["R Markdown", "plot", "regression"]
+---
+
+
+
+<pre class="r"><code>library(PerformanceAnalytics)
+library(tidyverse)
+library(psych)</code></pre>
+<div id="multiple-linear-regression" class="section level1">
+<h1>Multiple Linear Regression</h1>
+<p>This week we will cover multiple linear regression. As in previous post and in any model that you want to do we will need to test our assumtions and follow some general steps</p>
+<p>Procedure to perform Multiple Linear Regression:</p>
+<ol style="list-style-type: decimal">
+<li>Scatterplot matrix</li>
+<li>Fit multiple linear regression models</li>
+<li>Calculation estimate parameters, determine their standard errors, obtain tests and confidence intervals.</li>
+<li>Evaluation and explanation</li>
+</ol>
+<p>Let’s have our data</p>
+<pre class="r"><code>set.seed(21) #so we get the same results even with a random selection
+df&lt;-data.frame(temperature=rnorm(100,mean = 25,sd=5),
+               wind=rnorm(100,mean = 10,sd=1.2),
+               radiation=rnorm(100,mean = 5000,sd=1000),
+               bacterias=rnorm(100,mean = 50,sd=15),
+               groups=c(&quot;Day&quot;,&quot;Night&quot;)) #groups
+head(df,2)
+##   temperature     wind radiation bacterias groups
+## 1    28.96507 9.026934  5748.074  32.28645    Day
+## 2    27.61126 6.467452  3630.011  31.57719  Night</code></pre>
+<div id="mlr-assumption-independency" class="section level2">
+<h2>MLR Assumption (Independency)</h2>
+<p>Simple linear regression does not require this test because it has one independent variable. In this chapter, we test linearity and independence of observations (autocorrelation) to determine that independent variables are not too hihgly correlated.</p>
+<pre class="r"><code>cor(df$temperature,df$wind) #function to test the relationship between your independent variables
+## [1] -0.0069861</code></pre>
+</div>
+<div id="normality-and-linearity-assumptions" class="section level2">
+<h2>Normality and Linearity Assumptions</h2>
+<p>We still need to lest the other two assumption before the model. A function that will save us time is <code>chart.Correlation</code>, we can get <strong>Marginal Response Plots</strong> showing correlations and the significance of those correlations (independency), histograms and distributions (normality), and bivariate scatter plot with a fitted line (linearity). Although this does not test the normal distribution you can observe with histograms the distribution of your data for all your numeric variables and make some initial stimations.</p>
+<pre class="r"><code>chart.Correlation(df[,-5], #numeric data set
+                  histogram = T, #True show histograms
+                  method = &quot;pearson&quot;) #correlation method &quot;pearson&quot;, &quot;kendall&quot;, &quot;spearman&quot;</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Similarly, with a few variables then you can use <code>psych::corr.test</code> and determine correlation and the significance. What we used for the correlation plot in <a href="https://stats-bnu-2020.netlify.app/2020/09/23/stats-course-1week/">week 1</a>.</p>
+<pre class="r"><code>correlation.test &lt;- psych::corr.test(df[,1:4],use = &quot;pairwise&quot;,method = &quot;spearman&quot;) #relationship between all your variables
+my.correlation&lt;-correlation.test$r # from the test get ($) the correlation values
+p.values.correlation&lt;-correlation.test$p # from the test get ($) the correlation p values</code></pre>
+<ul>
+<li>Values close to 1 indicate that independent variables are nearly identical meaning that they do not meet the assumtions for multiple linear regression and should be treated or discharted.</li>
+</ul>
+</div>
+<div id="regression-fitting" class="section level2">
+<h2>Regression fitting</h2>
+<pre class="r"><code>fit.lm&lt;-lm(bacterias~.,data=df) #all the variables 
+#fit.lm&lt;-lm(bacterias~temperature+wind+radiation,data=df) same as before
+summary(fit.lm)
+## 
+## Call:
+## lm(formula = bacterias ~ ., data = df)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -44.829 -10.180   2.138  10.238  39.795 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 68.119654  19.742062   3.450 0.000836 ***
+## temperature -0.304967   0.317770  -0.960 0.339638    
+## wind        -1.469393   1.474082  -0.997 0.321385    
+## radiation    0.000886   0.001674   0.529 0.597873    
+## groupsNight -0.544984   3.265375  -0.167 0.867805    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 16.14 on 95 degrees of freedom
+## Multiple R-squared:  0.0252, Adjusted R-squared:  -0.01584 
+## F-statistic: 0.6141 on 4 and 95 DF,  p-value: 0.6535</code></pre>
+<p>Breakdown of the results elements:</p>
+<ul>
+<li><p>The estimates <code>(Estimate)</code> column gives you the change in y cause by each element of the regression. For <code>Intercept</code> or the value of the y when all the rest elements are 0 in this case 68.12 bacteria units on each test.Similarly, <code>temperature/rest of the variabels</code> show changes in y (population of bacteria) with one unit increase in <code>x</code>. In other words, temperature in the full model reduces bacteria population by -0.304 units for each increment in temperature if P &lt; 0.05. Here it isnt so we can not reach that conclussion.</p></li>
+<li><p>The standard error of the estimated values in the second column <code>Std. Error</code>.</p></li>
+<li><p>The test statistic <code>t value</code>.</p></li>
+<li><p>The p-value <code>Pr(&gt;| t | )</code>, the probability of finding the given t-statistic and therefore, the calculated <code>estimate</code> by chance.</p></li>
+</ul>
+</div>
+<div id="model-test-homoscedasticity" class="section level2">
+<h2>Model test (Homoscedasticity)</h2>
+<p>We should ensure that the model fited meets this last assumption, same variance, to maintain the model. The error term needs to be the same across all values of the independent variables.</p>
+<pre class="r"><code>par(mfrow=c(2,2))
+plot(fit.lm)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>par(mfrow=c(1,1))</code></pre>
+<p>Here we can see that the resudial erros are constant across groups and they are distributed evenly. Look at the <code>Normal Q-Q</code> (top right) which under homoscedasticity it should show points along the line.</p>
+</div>
+<div id="leverage-and-extrapolation" class="section level2">
+<h2>Leverage and extrapolation</h2>
+<p>Leverage h is a quantity solely depend on the predictors for all the cases in the data without any respect with responses. Leverage hi is called the leverage of observation i. It indicates the <strong>“pull”</strong> an observation has on the regression fit.</p>
+<p>Let’s look at that pull for different points.</p>
+<iframe height="400" width="100%" frameborder="no" src>
+</iframe>
+<blockquote>
+<p>Cases with large leverages should be inspected to make sure there are not errors in the data or other problems. We will show some methods to deal with them in the following posts</p>
+</blockquote>
+</div>
+</div>
