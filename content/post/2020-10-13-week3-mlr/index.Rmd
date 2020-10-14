@@ -1,7 +1,7 @@
 ---
 title: 'Week 3: Multiple Linear Regression'
 author: Roberto Supe
-date: '2020-10-12'
+date: '2020-10-14'
 slug: week-3-multiple-linear-regression
 categories: ["R"]
 tags: ["R Markdown", "plot", "regression"]
