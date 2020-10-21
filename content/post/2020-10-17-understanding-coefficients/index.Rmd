@@ -52,7 +52,7 @@ lm(Temp~A+B,airquality)
 lm(Temp~Solar.R+B,airquality)
 ```
 
-However, after linear transformation of the terms or the response, the fitting model has the same $df$  $$\hat{\sigma}$$, $ R^2$ and the overall F statistics also known as **Invariance**.
+However, after linear transformation of the terms or the response, the fitting model has the same $df$  $\hat{\sigma}$, $R^2$ and the overall F statistics also known as **Invariance**.
 
 ## Standardization of Terms
 
