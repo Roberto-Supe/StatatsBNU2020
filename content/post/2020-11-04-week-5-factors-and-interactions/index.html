@@ -1,0 +1,339 @@
+---
+title: 'Week 5: Factors and Interactions'
+author: Roberto Supe
+date: '2020-11-04'
+slug: week-5-factors-and-interactions
+categories:
+  - R
+tags:
+  - blog
+  - factors
+  - functions
+  - ggplot2
+  - mean
+  - model comparison
+  - outliers
+  - regression
+  - statistics
+  - weights
+---
+
+
+
+<p>This week we will use the following packages as always, load them at the beginning of the session 👩 👨</p>
+<pre class="r"><code>library(tidyverse)
+library(ggpubr)
+library(DMwR) #dataset
+#install.packages(&quot;package_name&quot;) #if you dont have one of them</code></pre>
+<div id="factors" class="section level1">
+<h1>Factors</h1>
+<p>Factor or the indicator variables, and sets of indicator variables that convert <strong>categorical predictors</strong> into numerical ones for use in regression models or plots. In R, each factor element, levels, will take a real number from 1 to n number of factors in x, these numbers determined alphabetically by default.</p>
+<pre class="r"><code>data(&quot;algae&quot;)
+head(as_tibble(algae))
+## # A tibble: 6 x 18
+##   season size  speed  mxPH  mnO2    Cl   NO3   NH4  oPO4   PO4  Chla    a1    a2
+##   &lt;fct&gt;  &lt;fct&gt; &lt;fct&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 winter small medi~  8      9.8  60.8  6.24 578   105   170    50     0     0  
+## 2 spring small medi~  8.35   8    57.8  1.29 370   429.  559.    1.3   1.4   7.6
+## 3 autumn small medi~  8.1   11.4  40.0  5.33 347.  126.  187.   15.6   3.3  53.6
+## 4 spring small medi~  8.07   4.8  77.4  2.30  98.2  61.2 139.    1.4   3.1  41  
+## 5 autumn small medi~  8.06   9    55.4 10.4  234.   58.2  97.6  10.5   9.2   2.9
+## 6 winter small high   8.25  13.1  65.8  9.25 430    18.2  56.7  28.4  15.1  14.6
+## # ... with 5 more variables: a3 &lt;dbl&gt;, a4 &lt;dbl&gt;, a5 &lt;dbl&gt;, a6 &lt;dbl&gt;, a7 &lt;dbl&gt;</code></pre>
+<p>Let’s look at the structure of the dataset.</p>
+<pre class="r"><code>str(algae[,1:8]) 
+## &#39;data.frame&#39;:    200 obs. of  8 variables:
+##  $ season: Factor w/ 4 levels &quot;autumn&quot;,&quot;spring&quot;,..: 4 2 1 2 1 4 3 1 4 4 ...
+##  $ size  : Factor w/ 3 levels &quot;large&quot;,&quot;medium&quot;,..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ speed : Factor w/ 3 levels &quot;high&quot;,&quot;low&quot;,&quot;medium&quot;: 3 3 3 3 3 1 1 1 3 1 ...
+##  $ mxPH  : num  8 8.35 8.1 8.07 8.06 8.25 8.15 8.05 8.7 7.93 ...
+##  $ mnO2  : num  9.8 8 11.4 4.8 9 13.1 10.3 10.6 3.4 9.9 ...
+##  $ Cl    : num  60.8 57.8 40 77.4 55.4 ...
+##  $ NO3   : num  6.24 1.29 5.33 2.3 10.42 ...
+##  $ NH4   : num  578 370 346.7 98.2 233.7 ...</code></pre>
+<p>As you can see, we got 3 categorical variables: <code>Season</code>, <code>Size</code> and <code>Speed</code> with different levels. To look at all the levels then you can use <code>levels(variable)</code></p>
+<pre class="r"><code>levels(algae$size)
+## [1] &quot;large&quot;  &quot;medium&quot; &quot;small&quot;</code></pre>
+<div id="anova" class="section level2">
+<h2>ANOVA</h2>
+<p>Analysis of variance is another type of linear model here, we will test that there is no difference in the mean <span class="math inline">\(\bar{y}\)</span> of all the independent variable levels <span class="math inline">\(j\)</span> also expressed as <span class="math inline">\(H_{0}: \bar{y}_j=0\)</span>. The <em>F-statistic</em> will compare the <span class="math inline">\(H_{0}\)</span> with the <span class="math inline">\(H_{1}\)</span>, alternative hypothesis at least one group with a mean function different from 0 <span class="math inline">\(H_{1}: \bar{y}_j\neq 0\)</span>. A larger value of F provides evidence against the <span class="math inline">\(H_{0}\)</span> and in favour of the <span class="math inline">\(H_{1}\)</span>.</p>
+<div id="one-way-anova" class="section level3">
+<h3>One-way ANOVA</h3>
+<p>Let’s use the function <code>aov</code> to calculate our One-way ANOVA</p>
+<pre class="r"><code>fit_aov&lt;-aov(mnO2~season,data=algae)
+summary(fit_aov)
+##              Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## season        3  159.2   53.06   10.64 1.65e-06 ***
+## Residuals   194  967.3    4.99                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 2 observations deleted due to missingness</code></pre>
+<p>Our F value is high resulting in a significant difference <span class="math inline">\(P&lt;0.05\)</span>. We can conclude that there is a difference in Manganese dioxide over seasons in our study area. However, we want to know the impact of each season on the area. As said before, ANOVA is also a linear model so we will turn that ANOVA into a linear model with each season group being one factor.</p>
+<pre class="r"><code>summary.lm(fit_aov)
+## 
+## Call:
+## aov(formula = mnO2 ~ season, data = algae)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.3798 -1.2148  0.4995  1.4972  4.5202 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   10.6005     0.3531  30.025  &lt; 2e-16 ***
+## seasonspring  -2.5909     0.4696  -5.517 1.09e-07 ***
+## seasonsummer  -1.1857     0.4878  -2.431 0.015980 *  
+## seasonwinter  -1.7207     0.4528  -3.800 0.000194 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.233 on 194 degrees of freedom
+##   (2 observations deleted due to missingness)
+## Multiple R-squared:  0.1413, Adjusted R-squared:  0.128 
+## F-statistic: 10.64 on 3 and 194 DF,  p-value: 1.649e-06</code></pre>
+<p>We can observe that the reference season in autumn and all seasons show a significant reduction. The biggest change is during spring with a reduction of 2.59 units in the mean value of Autom. This can be performed for all the levels with the help of Tukey’s range test</p>
+<div id="pairwise-analysis" class="section level4">
+<h4>Pairwise analysis</h4>
+<p>ANOVA will highlight any differences among the levels of the independent variable, but not which differences are significant. To establish each level as a <code>treatment group</code> and compare it with the rest in a post-hoc analysis, we will use TukeyHSD (Tukey’s Honestly-Significant Difference).</p>
+<pre class="r"><code>TukeyHSD(fit_aov)
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = mnO2 ~ season, data = algae)
+## 
+## $season
+##                     diff        lwr        upr     p adj
+## spring-autumn -2.5908846 -3.8078479 -1.3739214 0.0000007
+## summer-autumn -1.1857273 -2.4498770  0.0784225 0.0747333
+## winter-autumn -1.7206613 -2.8941785 -0.5471441 0.0011041
+## summer-spring  1.4051573  0.2198722  2.5904424 0.0128857
+## winter-spring  0.8702233 -0.2178800  1.9583266 0.1658059
+## winter-summer -0.5349340 -1.6755671  0.6056991 0.6178751</code></pre>
+<p>This output shows the pairwise differences between the seasons <code>($season)</code>.</p>
+<ul>
+<li>diff: difference in the mean between the <span class="math inline">\(n\)</span> group and reference group <span class="math inline">\(j_{n}\)</span>-<span class="math inline">\(j_{ref}\)</span>.</li>
+<li>lwr and upr: the lower and upper bounds of the 95% confidence interval.</li>
+<li>p-adj: the p-value of the difference.</li>
+</ul>
+<p>After running pairwise comparisons among each of the groups with a conservative error estimate we found the groups that are statistically different from one another.</p>
+<p>Look at the plot to understand the results better and observe those differences in the mean.</p>
+<pre class="r"><code>ggplot(algae,aes(x=season,y=mnO2,fill=season))+
+  geom_point()+
+  geom_boxplot()+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>We can directly get some comparisons which perform one-sample Wilcoxon tests on vectors of data with the help of the package <em>ggpubr</em></p>
+<pre class="r"><code>ggplot(algae,aes(x=season,y=mnO2,fill=season))+
+  geom_point()+
+  geom_boxplot()+
+  ggpubr::stat_compare_means(comparisons =list(c(1,2),c(1,3),c(1,4),c(2,3),c(2,4),c(3,4)),
+                             label = &quot;p.signif&quot;)+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+<div id="two-way-anova" class="section level3">
+<h3>Two-way ANOVA</h3>
+<p>ANOVA type II follows the same ideas as our one-way ANOVA, testing the difference in the group means of our quantitative variable. Here, we will use two categorical independent variables. With the addition of this new variable we will test how each independent variable affects the dependent variable as well as the interaction effect among them. Note that no significant interaction is assumed so we can continue with the analysis for main effects.</p>
+<pre class="r"><code>ggplot(algae,aes(x=season,y=mnO2,fill=size))+
+  geom_violin()+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>fit_aov&lt;-aov(mnO2~season*size,data=algae)
+summary(fit_aov)
+##              Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## season        3  159.2   53.06  11.086 9.94e-07 ***
+## size          2   45.5   22.77   4.756  0.00967 ** 
+## season:size   6   31.4    5.24   1.095  0.36703    
+## Residuals   186  890.3    4.79                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 2 observations deleted due to missingness</code></pre>
+<p>We get that season as expected rejects the <span class="math inline">\(H_o\)</span> and so does size but there is no difference for different seasons and groups so we should remove the interaction term.</p>
+<pre class="r"><code>fit_aov&lt;-aov(mnO2~season+size,data=algae)
+summary(fit_aov)
+##              Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## season        3  159.2   53.06  11.053 9.99e-07 ***
+## size          2   45.5   22.77   4.742  0.00977 ** 
+## Residuals   192  921.7    4.80                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 2 observations deleted due to missingness</code></pre>
+<p>Post-hoc testing will be the same with the Tukey’s Honestly-Significant-Difference (TukeyHSD) test, it lets us see which groups are different from one another</p>
+<pre class="r"><code>TukeyHSD(fit_aov)
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = mnO2 ~ season + size, data = algae)
+## 
+## $season
+##                     diff        lwr         upr     p adj
+## spring-autumn -2.5908846 -3.7851403 -1.39662888 0.0000004
+## summer-autumn -1.1857273 -2.4262891  0.05483451 0.0667579
+## winter-autumn -1.7206613 -2.8722816 -0.56904093 0.0008454
+## summer-spring  1.4051573  0.2419887  2.56832601 0.0107692
+## winter-spring  0.8702233 -0.1975769  1.93802352 0.1529061
+## winter-summer -0.5349340 -1.6542838  0.58441581 0.6031445
+## 
+## $size
+##                     diff         lwr      upr     p adj
+## medium-large 0.009204434 -0.94686616 0.965275 0.9997149
+## small-large  1.009510198  0.01785058 2.001170 0.0449708
+## small-medium 1.000305764  0.15944801 1.841164 0.0150440</code></pre>
+<p>This output shows the pairwise differences between the seasons <code>($season)</code> and between the three levels of algae size <code>($size)</code>.</p>
+<ul>
+<li>diff: difference in the mean between the <span class="math inline">\(n\)</span> group and reference group <span class="math inline">\(j_{n}\)</span>-<span class="math inline">\(j_{ref}\)</span>.</li>
+<li>lwr and upr: the lower and upper bounds of the 95% confidence interval.</li>
+<li>p-adj: the p-value of the difference.</li>
+</ul>
+</div>
+<div id="ancova" class="section level3">
+<h3>ANCOVA</h3>
+<p>Like ANOVA, “Analysis of Covariance” (ANCOVA) has a single continuous dependent variable. Unlike ANOVA, ANCOVA tests both a factor and a continuous independent variable (e.g. comparing carbon emission score by both ‘GDP’ and ‘continent’). The term for the continuous independent variable (IV) used in ANCOVA is named <strong>covariate</strong>. We will cover one-way ANCOVA and the classical model options.</p>
+<div id="assumptions" class="section level4">
+<h4>Assumptions</h4>
+<p>ANCOVA makes several assumptions about the data, such as:</p>
+<ul>
+<li><strong>Linearity</strong> between the covariate and the response variable for each level of the grouping variable. Test: Scatter plot of the covariate and the response variable.</li>
+<li><strong>Homogeneity</strong> of regression slopes. The slopes of the regression lines, formed by the covariate and the outcome variable, should be the same for each group. This assumption evaluates that there is no interaction between the response and the covariate. The plotted regression lines by groups should be parallel.</li>
+<li><strong>Normal Distribution</strong>, the response variable should be approximately normally distributed. Test: <code>Shapiro-Wilk</code> of the model residuals.</li>
+<li><strong>Homoscedasticity or homogeneity</strong> of residuals variance for all groups. The residuals are assumed to have a constant variance. Test: <code>Levene</code> for the residuals and groups</li>
+<li>No significant <strong>outliers</strong> in the groups. Test:</li>
+</ul>
+</div>
+<div id="model-4-coincident-regressions-for-all-levels" class="section level4">
+<h4>Model 4: Coincident Regressions for all levels</h4>
+<pre class="r"><code>library(carData)#data set
+fit_ancova&lt;-aov(IQbio~IQfoster*class,data = Burt)
+summary(fit_ancova)
+##                Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## IQfoster        1   5231    5231  83.382 9.28e-09 ***
+## class           2    175      88   1.396    0.270    
+## IQfoster:class  2      1       0   0.007    0.993    
+## Residuals      21   1317      63                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<ul>
+<li>Non-significant interaction so we should remove it.</li>
+<li>Categorical variable non-significant so we may not need to consider it as there is no difference in the mean.</li>
+<li>Result is a linear regression.</li>
+</ul>
+<pre class="r"><code>fit_ancova&lt;-aov(IQbio~IQfoster+class,data = Burt)
+summary(fit_ancova)
+##             Df Sum Sq Mean Sq F value  Pr(&gt;F)    
+## IQfoster     1   5231    5231  91.259 1.8e-09 ***
+## class        2    175      88   1.528   0.238    
+## Residuals   23   1318      57                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.lm(fit_ancova) # same as summary(lm(IQbio~IQfoster+class,data = Burt))
+...
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -0.6076    11.8551  -0.051    0.960    
+## IQfoster      0.9658     0.1069   9.031 5.05e-09 ***
+## classlow      6.2264     3.9171   1.590    0.126    
+## classmedium   2.0353     4.5908   0.443    0.662    
+...</code></pre>
+<p>The plot with no effect of the categorical variable.</p>
+<pre class="r"><code>ggplot(Burt,aes(IQfoster,IQbio))+
+  geom_point()+
+  geom_smooth(method = &quot;lm&quot;,se = T,colour=&quot;grey50&quot;)+
+  geom_smooth(method = &quot;lm&quot;,se=F,aes(colour=class))+
+  labs(x=&quot;IQ-Child with foster parent&quot;,y=&quot;IQ-Child with biological parent&quot;)+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+</div>
+<div id="model-3-group-influence-regression-lines" class="section level4">
+<h4>Model 3: Group Influence Regression Lines</h4>
+<p>Here, the levels of the categorical variable respond at different magnitudes with a change in the covariate. You may have the same intercept but, the key indicator is having different slopes and non-significant interaction.</p>
+<p>We tested the interaction assumption, it meet so we removed it from the ANCOVA.</p>
+<pre class="r"><code>fit_ancova&lt;-aov(a3~season+Chla,data = algae[algae$a3!=0,])
+summary.lm(fit_ancova) #seasons significant
+## 
+## Call:
+## aov(formula = a3 ~ season + Chla, data = algae[algae$a3 != 0, 
+##     ])
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -9.457 -4.507 -1.691  2.228 32.304 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   3.44311    1.67395   2.057 0.041903 *  
+## seasonspring  7.17081    2.01234   3.563 0.000529 ***
+## seasonsummer  1.67243    2.11639   0.790 0.430979    
+## seasonwinter  5.43295    2.02556   2.682 0.008363 ** 
+## Chla         -0.04733    0.03297  -1.435 0.153791    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 7.365 on 118 degrees of freedom
+##   (3 observations deleted due to missingness)
+## Multiple R-squared:  0.1349, Adjusted R-squared:  0.1056 
+## F-statistic: 4.601 on 4 and 118 DF,  p-value: 0.001732</code></pre>
+<p>Seasons have an impact on algae species, This will look like the following.</p>
+<pre class="r"><code>ggplot(algae[algae$a3!=0,],aes(Chla,a3))+
+  geom_point()+
+  geom_smooth(aes(colour=season),method = &quot;lm&quot;,se = F)+
+  ggpubr::stat_regline_equation(aes(label =  paste(..eq.label.., ..rr.label.., sep = &quot;~~~~&quot;), color = season))+
+  labs(x=&quot;Chlorophyll A&quot;,y=&quot;Algae species 3&quot;)+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>We can observe how lines change by different magnitudes (slopes <span class="math inline">\(\beta_j\)</span>). During winter the reduction is the biggest.</p>
+</div>
+<div id="model-2-parallel-regression-lines" class="section level4">
+<h4>Model 2: Parallel Regression Lines</h4>
+<p>When there is a significant effect of classes but this effect is identical (same slope) for all the groups as the continuous independent variable increase. We will get a plot like the following, this may be the perfect model for ANCOVA.</p>
+<pre class="r"><code>x=seq(1,3,0.05)
+df&lt;-data.frame(x,
+           y=c((1+.25*x),(2+.25*x),(3+.25*x)),
+           group=c(rep(&quot;A&quot;,length(x)),rep(&quot;B&quot;,length(x)),rep(&quot;C&quot;,length(x))))
+fit_ancova&lt;-aov(y~x*group,data=df)
+summary(fit_ancova)
+##              Df Sum Sq Mean Sq   F value Pr(&gt;F)    
+## x             1   2.69    2.69 4.828e+30 &lt;2e-16 ***
+## group         2  82.00   41.00 7.357e+31 &lt;2e-16 ***
+## x:group       2   0.00    0.00 1.520e+00  0.223    
+## Residuals   117   0.00    0.00                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>As expected there is no interaction between the categorical variable and covariate. The plot of this model would look something like this:</p>
+<pre class="r"><code>ggplot(data=df,aes(x=x,y=y))+
+  geom_point()+
+  geom_smooth(aes(colour=group),method = &quot;lm&quot;,se = F)+
+  ggpubr::stat_regline_equation(aes(label =  paste(..eq.label.., ..rr.label.., sep = &quot;~~~~&quot;), color = group))+
+  scale_y_continuous(limits = c(0,5))+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+</div>
+<div id="model-1-unrelated-regression-lines" class="section level4">
+<h4>Model 1: Unrelated Regression Lines</h4>
+<p>This is the model more familiar to us. In this case, our regressions crossover yet there is no significant interaction between the covariate and categorical variables. This is required for ANCOVA in you encounter a significant interaction you can use <code>moderated regression</code> which allows the interaction. The effect of the covariate is different for each level of our group.</p>
+<pre class="r"><code>df&lt;-filter(algae,a3!=0,a3&lt;20,mxPH&gt;7)
+fit_ancova&lt;-aov(a3~mxPH*season,data=df)
+summary(fit_ancova)
+##              Df Sum Sq Mean Sq F value  Pr(&gt;F)   
+## mxPH          1    5.0    4.95   0.237 0.62747   
+## season        3  289.4   96.46   4.613 0.00451 **
+## mxPH:season   3   46.2   15.39   0.736 0.53290   
+## Residuals   105 2195.7   20.91                   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The plot would look like this:</p>
+<pre class="r"><code>ggplot(filter(algae,a3!=0,a3&lt;30,mxPH&gt;7),aes(mxPH,a3))+
+  geom_point()+
+  geom_smooth(aes(colour=season),method = &quot;lm&quot;,se = F)+
+  ggpubr::stat_regline_equation(aes(label =  paste(..eq.label.., ..rr.label.., sep = &quot;~~~~&quot;), color = season),
+                                label.x.npc = .59)+
+  labs(x=&quot;Chlorophyll A&quot;,y=&quot;Algae species 3&quot;)+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<blockquote>
+<p>The models we used did not test the assumptions, and some may not be satisfied, therefore when doing your analysis make sure the steps highlighted in this and previous posts.</p>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
