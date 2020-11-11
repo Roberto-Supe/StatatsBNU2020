@@ -1,0 +1,197 @@
+---
+title: 'Week 6: Weights and Lack-of-Fit'
+author: Roberto Supe
+date: '2020-11-11'
+slug: week-6-weights-and-lack-of-fit
+categories:
+  - R
+tags:
+  - blog
+  - factors
+  - ggplot2
+  - ggplot2 Rstudio
+  - r
+  - R Markdown
+  - regression
+  - statistics
+  - weights
+  - lack of fit
+---
+
+
+
+<p>👩 This week we will use the following packages as always, load them at the beginning of the session 👨</p>
+<pre class="r"><code>library(tidyverse)
+library(EnvStats)</code></pre>
+<p>This week we will cover the steps that you will need when the assumptions of linear regression are not met.
+If you remember the assumptions for regression are the following:</p>
+<ul>
+<li>Normality</li>
+<li>Linearity <span class="math inline">\(E(Y|X)=F(x)\)</span></li>
+<li>Homoscedasticity <span class="math inline">\(Var(Y|X)=\sigma^2\)</span></li>
+</ul>
+<p>We should ensure that the model fitted meets all the assumptions. But what if it does not ???</p>
+<p>Usually, having a constant variance over the range of prediction (Homoscedasticity) is a bit problematic. If there is non-constant variance you will need to give <strong>weights</strong> to the cases to match the variances among your points.</p>
+<p>Larger weights causes smaller variance <span class="math inline">\(Var(y_{i}|Xi)=\sigma^2/w_{i}\)</span> where <span class="math inline">\(i=1,...n\)</span> and weights <span class="math inline">\(w_{i}&gt;0\)</span> are known levels. Let’s take the sleeping time of animals as an example.</p>
+<pre class="r"><code>data(msleep)
+ggplot(msleep,aes(x=bodywt,y=sleep_total))+
+  geom_point()+
+  theme_bw()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Clearly, we do not have a normal distribution, some animals have very large bodyweight. We will use a log transformation to have a better distribution.</p>
+<pre class="r"><code>msleep$bodywt&lt;-log(msleep$bodywt)
+msleep$bodywt[16]
+## [1] 0
+msleep$bodywt[16]&lt;-0.0000001</code></pre>
+<p>Now body weight is more uniform with a distribution closer to normal. Notice that with log-transformation we encounter a species with a bw=0 so we changed that value as little as possible for our regression analysis because you will get an error if you use 0.</p>
+<pre class="r"><code>fit_lm&lt;-lm(sleep_total~bodywt,msleep)
+summary(fit_lm)
+## 
+## Call:
+## lm(formula = sleep_total ~ bodywt, data = msleep)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.4991 -2.5671 -0.1683  2.0471 10.1928 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  11.0891     0.4178  26.542  &lt; 2e-16 ***
+## bodywt       -0.7771     0.1249  -6.222 2.05e-08 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 3.683 on 81 degrees of freedom
+## Multiple R-squared:  0.3233, Adjusted R-squared:  0.315 
+## F-statistic: 38.71 on 1 and 81 DF,  p-value: 2.046e-08</code></pre>
+<p>Now to add weights into the model you will need the parameter <code>weights</code> and type a formula that will be added to each <span class="math inline">\(x_i\)</span></p>
+<pre class="r"><code>fit_weights&lt;-lm(sleep_total~bodywt,weights = (1/msleep$bodywt^2),data=msleep)
+summary(fit_weights)
+## 
+## Call:
+## lm(formula = sleep_total ~ bodywt, data = msleep, weights = (1/msleep$bodywt^2))
+## 
+## Weighted Residuals:
+##    Min     1Q Median     3Q    Max 
+## -2.044  0.075  1.397  2.926 97.917 
+## 
+## Coefficients:
+##               Estimate Std. Error    t value Pr(&gt;|t|)    
+## (Intercept)  8.300e+00  1.490e-06  5.571e+06   &lt;2e-16 ***
+## bodywt      -1.625e+00  1.635e+00 -9.940e-01    0.323    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 14.81 on 81 degrees of freedom
+## Multiple R-squared:  0.01204,    Adjusted R-squared:  -0.0001536 
+## F-statistic: 0.9874 on 1 and 81 DF,  p-value: 0.3233</code></pre>
+<p>Our two models will look like the following:</p>
+<pre class="r"><code>ggplot(msleep,aes(x=bodywt,y=sleep_total))+
+  geom_point()+
+  geom_line(data=fortify(fit_lm),aes(x=bodywt,y=.fitted),colour=&quot;blue&quot;)+
+  geom_line(data=fortify(fit_weights),aes(x=bodywt,y=.fitted),colour=&quot;red&quot;)+
+  annotate(&quot;text&quot;,x=c(3,6.5),y=c(-1,9),
+           label=c(expression(&quot;W== 1/x[i]^2&quot;),
+                   expression(&quot;lm~model&quot;)),parse=T, #must be included to have the right format
+           colour=c(&quot;red&quot;,&quot;navy&quot;), #different colours for each text
+           size=8)+
+  theme_test()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<div id="lack-of-fit-methods" class="section level1">
+<h1>Lack-of-Fit Methods</h1>
+<p>This part will cover some model checking methods to decide if the form of the mean function used to obtain a fitted model is reasonable in a particular regression. That is, whether there is something wrong with the observations for which the fit is not good.</p>
+<div id="visual-lack-of-fit-with-smooths" class="section level2">
+<h2>Visual Lack-of-Fit with Smooths</h2>
+<pre class="r"><code>ggplot(msleep,aes(x=bodywt,y=sleep_total))+
+  geom_point()+
+  geom_smooth(aes(outfit=regressionvalues_02&lt;&lt;-..y..),span=0.2,colour=&quot;steelblue&quot;,se=F)+
+  geom_smooth(aes(outfit=regressionvalues_05&lt;&lt;-..y..),span=0.5,colour=&quot;darkgreen&quot;,se=F)+
+  geom_smooth(aes(outfit=regressionvalues_09&lt;&lt;-..y..),span=0.9,colour=&quot;violet&quot;,se=F)+
+  geom_smooth(aes(outfit=regressionvalues_00&lt;&lt;-..y..),colour=&quot;orange&quot;,se=F)+
+  stat_smooth(method = &quot;lm&quot;,colour=&quot;tomato&quot;,se=F)+
+  annotate(&quot;text&quot;,x=7,y=c(19.5,18,17,16,15),label=c(bquote(&quot;Smoothness value=&quot;~alpha),&quot;0.2&quot;,&quot;0.5&quot;,&quot;0.9&quot;,&quot;default&quot;) ,colour=c(&quot;black&quot;,&quot;steelblue&quot;,&quot;darkgreen&quot;,&quot;violet&quot;,&quot;orange&quot;),parse=T)+
+  theme_test(base_size=16)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Ggplot with <code>geom_smooth</code> or <code>stat_smooth</code> use by default a smooth polynomial regression. That is, for the fit at point <span class="math inline">\(x\)</span>, the fit is made using points in a neighbourhood of <span class="math inline">\(x\)</span>, weighted by their distance from <span class="math inline">\(x\)</span> (with differences in ‘parametric’ variables being ignored when computing the distance). The size of the neighbourhood is controlled by <span class="math inline">\(\alpha\)</span> (set by span=x as in the previous plot). You can find <a href="https://rdrr.io/r/stats/loess.html">more information here</a>.</p>
+<p>We added <code>outfit</code> to the geom_smooth in order to store the <code>..y..</code> values of the fitted regression in a <code>new variable&lt;-</code>. It will only give you 80 points.</p>
+<pre class="r"><code>head(regressionvalues_00,20)
+##  [1] 13.35127 13.33551 13.31757 13.29744 13.27509 13.25049 13.22363 13.19449
+##  [9] 13.16304 13.12927 13.09314 13.05464 13.01375 12.97037 12.92343 12.87250
+## [17] 12.81739 12.75796 12.69405 12.62550</code></pre>
+<p>*In these course we focus in linear model but <a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a> can integrate all types of <code>models=</code> (e.g. “lm”, “glm”, “gam”, “loess” or a function from other packages MASS::rlm or mgcv::gam) and <code>formulas=</code> (e.g. y ~ x, y ~ poly(x, 2), y ~ log(x)) once specified.</p>
+</div>
+<div id="lack-of-fit-based-on-variance" class="section level2">
+<h2>Lack-of-Fit Based on Variance</h2>
+<p>We will test if our model has too much variation due to a lack of fit with an <em>F</em>-test. Let’s bring our initial lm and get the ANOVA results.</p>
+<pre class="r"><code>anova(fit_lm)
+## Analysis of Variance Table
+## 
+## Response: sleep_total
+##           Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## bodywt     1  525.14  525.14  38.707 2.046e-08 ***
+## Residuals 81 1098.93   13.57                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The RSS are 1098.925779. We will break the Residual Sum of Squares into SSLF:Sum of Squares Lack of Fit and SSPE: Sum of Squares pure error.</p>
+<pre class="r"><code>olsrr::ols_pure_error_anova(fit_lm)
+##    Lack of Fit F Test    
+## ------------------------
+## Response :   sleep_total 
+## Predictor:   bodywt 
+## 
+##                        Analysis of Variance Table                        
+## ------------------------------------------------------------------------
+##                 DF     Sum Sq     Mean Sq      F Value        Pr(&gt;F)     
+## ------------------------------------------------------------------------
+## bodywt           1    525.1398    525.1398    105027.95    7.307278e-128 
+## Residual        81    1098.926    13.56698                               
+##  Lack of fit    80    1098.921    13.73651     2747.302        0.0151741 
+##  Pure Error      1       0.005       0.005                               
+## ------------------------------------------------------------------------
+EnvStats::anovaPE(fit_lm)
+##                   Df  Sum Sq Mean Sq  F value   Pr(&gt;F)   
+## bodywt             1  525.14  525.14 105028.0 0.001964 **
+## Lack of Fit       80 1098.92   13.74   2747.3 0.015174 * 
+## Pure Error         1    0.01    0.01                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The F-statistic <span class="math inline">\(F^*=\frac{MSLF}{MSPE}\)</span> for the <code>Lack of fit</code> helps us in testing:</p>
+<ul>
+<li><span class="math inline">\(H_0\)</span>: The relationship assumed in the model is reasonable, i.e., there is no lack of fit <span class="math inline">\(\mu_i=\beta_0+\beta_1X_i\)</span>.</li>
+<li><span class="math inline">\(H_A\)</span>: The relationship assumed in the model is not reasonable, i.e., there is lack of fit <span class="math inline">\(\mu_i\neq\beta_0+\beta_1X_i\)</span>.</li>
+</ul>
+<p>In our example, the P-value is small than the significance level α, meaning that we reject the null hypothesis <span class="math inline">\(H_0\)</span> in favour of the alternative <span class="math inline">\(H_A\)</span>. Therefore, there is enough evidence at the α level to conclude that there is a lack of fit in the current model.</p>
+<p>We get similar <code>lack of fit</code> results with the weighted regression:</p>
+<pre class="r"><code>olsrr::ols_pure_error_anova(fit_weights)
+##    Lack of Fit F Test    
+## ------------------------
+## Response :   sleep_total 
+## Predictor:   bodywt 
+## 
+##                         Analysis of Variance Table                         
+## --------------------------------------------------------------------------
+##                 DF     Sum Sq       Mean Sq       F Value        Pr(&gt;F)    
+## --------------------------------------------------------------------------
+## bodywt           1    216.5156        216.5156    43303.12    2.68224e-112 
+## Residual        81       1e+28    1.234568e+26                             
+##  Lack of fit    80       1e+28        1.25e+26     2.5e+28     5.03052e-15 
+##  Pure Error      1       0.005           0.005                             
+## --------------------------------------------------------------------------
+EnvStats::anovaPE(fit_weights)
+##                   Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
+## bodywt             1   216.5  216.52  393.37 0.03207 *
+## Lack of Fit       80 17760.9  222.01  403.35 0.03959 *
+## Pure Error         1     0.6    0.55                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>Therefore, if we test if there is a difference between models we obtain a non-significant difference.</p>
+<pre class="r"><code>fit2&lt;-lm(msleep$sleep_total~factor(msleep$bodywt),data=msleep)
+anova(fit_weights,fit2)
+## Analysis of Variance Table
+## 
+## Response: sleep_total
+##           Df  Sum Sq Mean Sq F value Pr(&gt;F)
+## bodywt     1   216.5  216.52  0.9874 0.3233
+## Residuals 81 17761.4  219.28</code></pre>
+</div>
+</div>
