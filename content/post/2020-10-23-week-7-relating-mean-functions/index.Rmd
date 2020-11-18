@@ -1,0 +1,141 @@
+---
+title: 'Week 7: Relating Mean Functions'
+author: Roberto Supe
+date: '2020-11-18'
+slug: week-7-relating-mean-functions
+categories:
+  - R
+tags:
+  - blog
+  - factors
+  - ggplot2
+  - r
+  - R Markdown
+  - regression
+  - statistics
+  - mean
+  - functions
+  - sequential fitting
+  - model comparison
+  - outliers
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE,
+                      echo = T,
+                   cache = T,
+                   message = FALSE,
+                   warning = FALSE)
+```
+
+This week we will use the following packages as always, load them at the beginning of the session `r knitr::asis_output("\U1F468")``r knitr::asis_output("\U1F469")` 
+
+```{r}
+library(tidyverse)
+library(EnvStats)
+library(DMwR)
+#install.packages("package_name")
+```
+
+# Removing Terms
+
+We try to get a simpler mean function by constraining some of the coefficients in $n$ to equal specified values, or equal to one another. Models formed in this way are called **submodels** because they are formed by imposing constraints on the regression coefficients in the full model $E(y|x)=n^Tu$.
+
+## Submodels
+
+They remove terms from the full model so we can select the `simplest model` that best fits the data. They assume and test for a constant variance $Var(y|x)=Var(y|u)=\sigma^2$
+
+A regression model based on a subset of terms depends on the distribution of the terms, which in turn depends on the distribution of the predictors. If the terms are independent or linearly related, then the submodel mean functions generally have the same form as the full mean function. If the terms are dependent but not linearly related, anything can happen, and the regression for the full model may tell us little about the regression for a submodel.
+These comments apply whenever the term deleted has a nonzero regression coefficient in the full model. If the coefficient is zero, then deleting the term has no effect on the mean function.
+
+When we did linear regression we calculated the interaction and removed it when it was non-significant. That was a way to remove terms. Now we will remove terms from multiple regressions.
+
+```{r}
+data("algae")
+algae_a3<-filter(algae,a3!=0)%>%
+  select(1:11,14)%>%
+  drop_na()#na.omit(complete.cases())
+fit_H0<-lm(a3~.,data=algae_a3)
+summary(fit_H0)
+```
+
+Well, we got a lot of terms and we may think that we should select the significant ones. However, that may not the best option as one variable may change with different combinations. Dropping a term from a regression can change both the mean function and the variance function in important ways unless the value of the regression coefficient for that term is = 0. `r knitr::asis_output("\U1F914")` so how to decide?
+
+Analysis of variance is used to summarize the calculations necessary for comparing competing models on the same data. It is appropriate only for such nested hypotheses.
+
+* $H_0$: The relationship assumed in the nested model is reasonable, i.e., dropping terms did not change the variance $Var(y)=\sigma^2$.
+* $H_A$: The relationship assumed in the nested model is not reasonable, i.e., dropping terms did change the variance $Var(y)=\sigma^2$.
+
+```{r}
+fit_HA<-lm(a3~season+mxPH+mnO2+NH4,data=algae_a3)
+summary(fit_HA)
+```
+
+Now, the majority of significant terms reduced their P even mxPH is now significant so will this model be better than the last one. You can test both models with $F^*=\frac{(RSS_{NH}-RSS_{AH})/(df_{NH}-df_{AH})}{\hat\sigma_{AH}^2}$ Larger value of F provide evidence against the NH and in favor of the AH. To judge the worth of the submodel, look at the mean squared error (MSE) of a fitted value from the submodel:
+
+In R we will use the function `anova(model1,model2)` to test which model is better.
+```{r}
+anova(fit_HA,fit_H0)
+```
+
+Our F-value is small meaning that dropping terms did not change the variance so we can keep the reduced model.
+As you may have realized maybe there are several options $2^k$ with k terms that it will be time-consuming so we will let the machine to calculate and use *Stepwise regression*.
+
+## Stepwise regression
+
+Realized by successively adding/deleting terms to a base model. We can consider this because including highly correlated terms in a regression model can inflate the variances of estimates, fitted values and of predictions. So it is better to remove highly correlated terms from a regression model *linearity assumption*. 
+
+
+```{r}
+full.model <- lm(a3~., data = algae_a3)
+# Stepwise regression model
+step.model <- MASS::stepAIC(full.model, direction = "both", 
+                      trace = FALSE)
+summary(step.model)
+```
+
+You got two options; forward selection this will add terms one by one until the t-statistic for the next term is less than the reference cutoff; backward elimination, terms are deleted until the t-statistics for the next term to be deleted is greater than the cutoff. The final and suggested model will have the smallest AIC. Look at all the different models by using `trace=TRUE`.
+
+Nevertheless,there are a few articles [1](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2656.2006.01141.x), [2](https://onlinelibrary.wiley.com/doi/full/10.1111/j.1399-3054.2010.01431.x),  and other [posts](http://goodsciencebadscience.nl/?p=424) that consider sequential fitting bias and likely to give you false readings as multiple testings are being run. Algorithmic stepwise model selection can overstate significance, therefore, you can use Factor analysis, Partial Least Squares Regression, or Least Absolute Shrinkage and Selection Operator (LASSO) that group or constrain the coefficient estimates in some way. Packages in R like `pls, lars, or glmnet` can help with the tasks.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
