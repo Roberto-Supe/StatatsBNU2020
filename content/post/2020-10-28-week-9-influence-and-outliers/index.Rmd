@@ -1,0 +1,216 @@
+---
+title: 'Week 9: Influence and Outliers'
+author: Roberto Supe
+date: '2020-12-09'
+slug: week-9-influence-and-outliers
+categories:
+  - R
+tags:
+  - blog
+  - factors
+  - functions
+  - ggplot2
+  - mean
+  - model comparison
+  - outliers
+  - plot
+  - read.csv
+  - R Markdown
+  - regression
+  - statistics
+  - r
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE,
+                      echo = T,
+                   cache = T,
+                   message = FALSE,
+                   warning = FALSE)
+```
+
+`r knitr::asis_output("\U1F469")` This week we will use the following packages as always, load them at the beginning of the session `r knitr::asis_output("\U1F468")`
+
+```{r}
+library(tidyverse)
+library(car)
+library(outliers)
+library(dae) #install.packages("dae")
+library(car)
+library(DMwR)
+library(olsrr)
+library(stats)
+library(ggrepel)
+library(ggstatsplot)
+library(plotly)
+#install.packages("package_name")
+```
+
+This week we will look at observations with high influence on the regression. They can change the distribution of residuals or significantly reduce the variation explained by the model $R^2$.
+
+Separated or outlying points can cause us to miss important trends by reducing visual resolution in the plots. They also have a large influence on the results of the analysis.
+
+Some methods to deal with them: 
+
+* Transformations of the data to more suitable scales
+* Temporarily removing them from the plot
+
+# Univariate
+
+## Boxplot
+
+Boxplots are great graphs to visualize outliers. Most of them identify outliers when those observations lie outside $1.5 * IQR$. The IQR (Inter Quartile Range) is the value difference between 75th and 25th quartiles. In a boxplot, we will look at the points outside the whiskers.
+
+```{r}
+data(algae)
+outliers<-boxplot.stats(algae$Cl)$out
+boxplot(algae$Cl, main="Pressure Height", boxwex=0.1)
+mtext(paste("Outliers: ", paste(outliers, collapse=", ")), cex=0.5,at = c(0.8,300),outer = F)
+```
+
+```{r}
+
+calculate_outlier <- function(x) {
+  return(x < quantile(x, 0.25) - 1.5 * IQR(x) | x > quantile(x, 0.75) + 1.5 * IQR(x))
+}
+
+data("algae")
+outlier.data<-  dplyr::mutate(algae,obs=seq_along(algae$season))%>%
+                gather(key = "variables",value = "values",4:18,na.rm = T)%>%
+                dplyr::group_by(variables)%>%
+                dplyr::mutate(outlier=ifelse(calculate_outlier(values),obs,NA))
+
+ggplot()+
+  geom_boxplot(outlier.data,mapping=aes(x=variables,y=values))+
+  geom_text_repel(outlier.data,mapping=aes(x=variables,y=values,label=outlier))+
+  facet_wrap(variables~.,scales = "free")+
+  theme_bw()
+
+```
+
+geom_text_repel does not work as expected so we use geom_text and move the text to the right so we can have some space between the points. 
+
+```{r}
+p=ggplot(outlier.data)+
+  geom_boxplot(mapping=aes(x=variables,y=values))+
+  geom_text(mapping=aes(x=variables,y=values,label=outlier),nudge_x = 0.1)+
+  facet_wrap(variables~.,scales = "free")+
+  theme_bw()
+plotly::ggplotly(p)
+```
+
+# Multivariate model
+
+## Cook's Distance
+
+Cook’s distance is a mathematical measure of the impact of deleting a case on the estimated regression coefficients **not a statistical test**. 
+Each case or sample has one Cook’s distance $D$ value and the plot orders them in terms of their influence on the fitted $hat_y$.
+
+It is generally useful to study cases with $D_i>0.5$ and important to study cases with $D_i>1$.
+
+
+```{r}
+fit1<-lm(NO3~mxPH+Cl,data=algae) #
+cooksd <- cooks.distance(fit1) #store the D of each point in a named numeric form
+plot(cooksd, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot cook's distance
+abline(h = 4*mean(cooksd, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooksd)+1, y=cooksd, col="red",adj = c(0.15,0.1), 
+     labels=ifelse(cooksd>4*mean(cooksd, na.rm=T),names(cooksd),""))  # add labels
+```
+
+Get the information about these extreme observations.
+```{r}
+influential=cooksd[cooksd>(4*mean(cooksd, na.rm=T))]  # get the influential row numbers
+filtered_data<-algae[-which(row.names(algae) %in% names(influential)),] #remove the rows inside influential
+head(algae[names(influential), ])  # influential observations.
+```
+We do not have a variable unique to each observation so we will need to use `row.names()` as well as the `names()` which takes the row number for each value inside influential. 
+
+We can use a different package for this style of plot.
+
+```{r}
+a=olsrr::ols_plot_cooksd_chart(model = fit1,print_plot = T)+
+    theme_bw()
+```
+
+In this case we got values that are different to the rows in the main data set so we can have a look at the plot data to get the actual rows.
+```{r}
+values=row.names(a$data[(a$data$fct_color=="outlier"),])
+values
+fit2<-lm(NO3~mxPH+Cl,data=algae[-as.integer(values),]) #our second regression
+```
+
+## Test for outliers
+
+The function `outlierTest` from car package gives the most extreme observation based on the given model by using the Bonferroni Outlier Test.
+
+```{r}
+car::outlierTest(fit1,n.max=Inf) #the largest influence cause by this value 
+fit3<-lm(NO3~mxPH+Cl,data=algae[-153,]) #remove that observation
+car::outlierTest(fit3) #the largest influence in the new model
+```
+
+With the package `Outliers` we calculate the extreme observations. First let's look at the extremest value with `outlier`.
+
+```{r}
+outlier(algae$Cl)
+```
+
+Use the scores function to calculates normal, t, chi-squared, IQR and MAD scores of given data.
+
+```{r}
+head(scores(na.omit(algae$Cl), type="chisq"))
+```
+
+We can test which observations are beyond a given probability (percentile).
+```{r}
+head(scores(na.omit(algae$Cl), type="chisq",prob = 0.95),40)
+```
+
+# Regression changes
+
+Let's have a look at the results when we removed those observations
+```{r}
+summary(fit1)
+summary(fit2)
+```
+
+We can see changes in the estimates as in the $Adjusted R^2$.
+
+Finally, the function `plot` is great to test distribution, variance or outliers.
+
+```{r}
+par(mfrow=c(2,2))
+plot(fit1)
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(fit2)
+```
+
+# More detailed information
+
+Recent packages integrate more complex statistics to ggplot2. We can have a look at the boxplots created with ggstatsplot.
+
+```{r}
+library(ggstatsplot)
+ggbetweenstats(algae,x = season,y=Cl,outlier.tagging = T)
+```
+
+
+We have some outliers so we can try removing them
+```{r}
+Q <- quantile(algae$Cl, probs=c(.25, .75), na.rm = T) #calculate 25% and 75%
+iqr <- IQR(algae$Cl,na.rm = T) #IQR of the data
+eliminated<- subset(algae, algae$Cl > (Q[1] - 1.5*iqr) & algae$Cl  < (Q[2]+1.5*iqr)) #rows with extreme observations out
+ggbetweenstats(eliminated, x = season,y =  Cl, outlier.tagging = F) #new plot
+```
+
+Package description and [more information](https://cran.r-project.org/web/packages/ggstatsplot/ggstatsplot.pdf):
+
+> ggstatsplot is an extension of ggplot2 package for creating graphics with details from statistical tests included in the plots themselves and targeted primarily at behavioral sciences community to provide a one-line code to produce information-rich plots. In a typical exploratory data analysis workflow, data visualization and statistical modeling are two different phases: visualization informs modeling, and modeling in its turn can suggest a different visualization method, and so on and so forth. The central idea of ggstatsplot is simple: combine these two phases into one in the form of graphics with statistical details, which makes data exploration simpler and faster. Currently, it supports only the most common types of statistical tests (parametric, non-parametric, Bayes Factor, and robust versions of t-test/anova, correlation, regression analyses, contingency tables analyses, and meta-analysis).
+
+
+
