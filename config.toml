@@ -1,4 +1,4 @@
-baseurl = "/"
+baseurl = "https://stats-bnu-2020.netlify.app/"
 languageCode = "en-us"
 title = "BNU-Statistics with R"
 theme = "hugo-lithium"
