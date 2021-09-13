@@ -15,7 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE,
                    warning = FALSE)
 ```
 
-`r knitr::asis_output("\U1F469")` This week we will use the following packages as always, load them at the beginning of the session `r knitr::asis_output("\U1F468")`
+`r knitr::asis_output("\U1F469")` This week, we will use the following packages as always, load them at the beginning of the session `r knitr::asis_output("\U1F468")`
 
 ```{r,eval=FALSE}
 library(tidyverse)
@@ -34,15 +34,15 @@ library(DMwR)
 
 ## Rate of Change
 
-The simplest or the most basic explanation of the coefficient _*n*_.
+The simplest or the most basic explanation of the coefficient _*n*_:
 
-A regression coefficient can be interpreted as the change in the expected response given a change in the corresponding term by one unit, **assuming that other terms are held fixed**.
+> A regression coefficient can be interpreted as the change in the expected response given a change in the corresponding term by one unit, **assuming that other terms are held fixed**.
 
 `However, with polynomial equations, the plot of the fitted curve is likely to be more informative than the values of the parameters`.
 
 ## Reparameterization
 
-Sometimes, we need to consider replacing terms with linear or non linear transformations of them. In general, to make new variables you can use the function mutate form `dplyr`'s package.
+Sometimes, we need to consider replacing terms with linear or nonlinear transformations. In general, to make new variables, you can use the function `mutate` from  the `dplyr` package.
 
 ```{r}
 data("airquality")
@@ -50,13 +50,12 @@ airquality<-mutate(airquality,A=Wind/Ozone,B=Solar.R*Wind)
 lm(Temp~Wind+Solar.R,airquality)
 lm(Temp~A+B,airquality)
 lm(Temp~Solar.R+B,airquality)
-```
 
-However, after linear transformation of the terms or the response, the fitting model has the same $df$  $\hat{\sigma}$, $R^2$ and the overall F statistics also known as **Invariance**.
+```
 
 ## Standardization of Terms
 
-Terms usually come with different units, to get the relative importance, do rescaling:
+Terms usually come with different units, to get the relative importance, do `rescaling`:
 
 ```{r}
 #install.packages("DMwR") #install the ReScaling function
@@ -71,16 +70,15 @@ a=data.frame(do.call(cbind,
                           t.mx=50,t.mn=1))) #required arguments for the function
 ```
 
-It is more informative than the untransformed coefficients. But still may miss leading. E.g. sampling over a small range versus over a large range for the same population.
+It is more informative than the untransformed coefficients. But still may miss leading, e.g., sampling over a small range versus a large range for the same population.
 
 ## Sampling Distributions
 
-The coefficients are useful and inference can be made *ONLY IF* the samples were taken **randomly**. In certain conditions, we can assume the samples to be random samples and then explain the regression coefficients and making statistical inferences. But a lot of times, we can not do this.
-
+The coefficients are useful, and we can understand the data *ONLY IF* the samples were taken **randomly**. In certain conditions, we can assume the samples to be random samples and then explain the regression coefficients and making statistical inferences. But a lot of times, we can not do this.
 
 # 2D-Added variable plots
 
-The Added Variable Plot helps us to visualizi the effect of each term in the model. They evaluate the residuals (and coefficients) of the predictor variables holding other variables constant, a visual assessment of the *net effect*.
+The Added Variable Plot helps us to visualize the effect of each term in the model. They evaluate the predictor variables' residuals (and coefficients) holding other variables constant, a visual assessment of the *net effect*.
 
 First, let's look at the individual regression.
 
@@ -94,6 +92,7 @@ ggplot(airquality,aes(y=Temp,x=Wind))+
                 aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                 parse = TRUE,colour="Blue",label.y = 0.12,size=5)+
   theme(text = element_text(size=13))
+
 ggplot(airquality,aes(y=Temp,x=Solar.R))+
   geom_point()+
   geom_smooth(method = lm,colour="red")+
@@ -103,14 +102,14 @@ ggplot(airquality,aes(y=Temp,x=Solar.R))+
   theme_bw(base_size = 15)
 ```
 
-Now we will fit a multiple linear regression and explore the variable that has the biggest impact on temperature.
+Now we will fit a multiple linear regression and explore the variable that has the most significant impact on temperature.
 
 ```{r}
 fit.lm<-lm(Temp~Wind+Solar.R+Ozone,airquality)
 summary(fit.lm)
 ```
 
-Looks like `Ozone` has an impact on temperature. Let's get our 2D-AVP with the help of the `car` package.
+It looks like `Ozone` has an impact on temperature. Let's get our 2D-AVP with the help of the `car` package.
 
 ```{r}
 #install.packages("car")
@@ -118,7 +117,7 @@ library(car)
 avPlots(fit.lm)
 ```
 
-Here we can also observe that Ozone has the greatest impact on temperature. There are a few observations like 117 showing some influence on the data and may need to take into consideration. 
+Here we can also observe that Ozone has the greatest impact on temperature. A few observations like 117 show some influence on the data and may need to be taken into further consideration. 
 
 ### Three extreme AVP cases:
 
@@ -168,9 +167,9 @@ ggplot(points,aes(x,y))+
 
 ## Variance-Covariance matrix
 
-A variance-covariance matrix is a square matrix showing the variances and covariances of your model variables. The diagonal elements of the matrix contain the variances of your variables and the off-diagonal values show the covariances between pairs of variables. 
+A variance-covariance matrix is a square matrix showing the variances and covariances of your model variables. The diagonal elements of the matrix contain the variances of your variables, and the off-diagonal values show the covariances between pairs of variables. 
 
-To create the matrix use the function `vcov` from the package stats already installed in R by default.
+To create the matrix, use the function `vcov` from the package stats already installed in R by default.
 
 ```{r}
 vcov(fit.lm)
@@ -213,9 +212,6 @@ ggplot(mtcars,aes(x=mpg,y=qsec))+
   theme_bw()
 
 ```
-
-
-
 
 
 

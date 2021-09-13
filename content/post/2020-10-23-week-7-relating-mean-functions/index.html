@@ -20,6 +20,7 @@ tags:
   - outliers
 ---
 
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
 
 
 <p>This week we will use the following packages as always, load them at the beginning of the session 👨👩</p>
@@ -29,13 +30,13 @@ library(DMwR)
 #install.packages(&quot;package_name&quot;)</code></pre>
 <div id="removing-terms" class="section level1">
 <h1>Removing Terms</h1>
-<p>We try to get a simpler mean function by constraining some of the coefficients in <span class="math inline">\(n\)</span> to equal specified values, or equal to one another. Models formed in this way are called <strong>submodels</strong> because they are formed by imposing constraints on the regression coefficients in the full model <span class="math inline">\(E(y|x)=n^Tu\)</span>.</p>
+<p>We try to get a more straightforward mean function by constraining some of the coefficients in <span class="math inline">\(n\)</span> to equal specified values or equal to one another. Models formed in this way are called <strong>submodels</strong> because they are created by imposing constraints on the regression coefficients in the full model <span class="math inline">\(E(y|x)=n^Tu\)</span>.</p>
 <div id="submodels" class="section level2">
 <h2>Submodels</h2>
-<p>They remove terms from the full model so we can select the <code>simplest model</code> that best fits the data. They assume and test for a constant variance <span class="math inline">\(Var(y|x)=Var(y|u)=\sigma^2\)</span></p>
-<p>A regression model based on a subset of terms depends on the distribution of the terms, which in turn depends on the distribution of the predictors. If the terms are independent or linearly related, then the submodel mean functions generally have the same form as the full mean function. If the terms are dependent but not linearly related, anything can happen, and the regression for the full model may tell us little about the regression for a submodel.
+<p>They remove terms from the full model to select the <code>simplest model</code> that best fits the data. They assume and test for a constant variance <span class="math inline">\(Var(y|x)=Var(y|u)=\sigma^2\)</span></p>
+<p>A regression model based on a subset of terms depends on the distribution of the terms, which in turn depends on the distribution of the predictors. If the terms are independent or linearly related, the submodel mean functions generally have the same form as the full mean function. If the terms are dependent but not linearly related, anything can happen, and the regression for the full model may tell us little about the regression for a submodel.
 These comments apply whenever the term deleted has a nonzero regression coefficient in the full model. If the coefficient is zero, then deleting the term has no effect on the mean function.</p>
-<p>When we did linear regression we calculated the interaction and removed it when it was non-significant. That was a way to remove terms. Now we will remove terms from multiple regressions.</p>
+<p>When we did linear regression, we calculated the interaction and removed it when it was non-significant. That was a way to remove terms. Now we will remove terms from multiple regressions.</p>
 <pre class="r"><code>data(&quot;algae&quot;)
 algae_a3&lt;-filter(algae,a3!=0)%&gt;%
   select(1:11,14)%&gt;%
@@ -74,7 +75,7 @@ summary(fit_H0)
 ## Residual standard error: 7.219 on 106 degrees of freedom
 ## Multiple R-squared:  0.2504, Adjusted R-squared:  0.1443 
 ## F-statistic:  2.36 on 15 and 106 DF,  p-value: 0.00576</code></pre>
-<p>Well, we got a lot of terms and we may think that we should select the significant ones. However, that may not the best option as one variable may change with different combinations. Dropping a term from a regression can change both the mean function and the variance function in important ways unless the value of the regression coefficient for that term is = 0. 🤔 so how to decide?</p>
+<p>Well, we got many terms, and we may think that we should select the significant ones. However, that may not be the best option as one variable may change with different combinations. Dropping a term from a regression can change both the mean function and the variance function in fundamental ways unless the value of the regression coefficient for that term is = 0. 🤔 so how to decide?</p>
 <p>Analysis of variance is used to summarize the calculations necessary for comparing competing models on the same data. It is appropriate only for such nested hypotheses.</p>
 <ul>
 <li><span class="math inline">\(H_0\)</span>: The relationship assumed in the nested model is reasonable, i.e., dropping terms did not change the variance <span class="math inline">\(Var(y)=\sigma^2\)</span>.</li>
@@ -105,7 +106,7 @@ summary(fit_HA)
 ## Residual standard error: 7.077 on 115 degrees of freedom
 ## Multiple R-squared:  0.2184, Adjusted R-squared:  0.1776 
 ## F-statistic: 5.356 on 6 and 115 DF,  p-value: 6.589e-05</code></pre>
-<p>Now, the majority of significant terms reduced their P even mxPH is now significant so will this model be better than the last one. You can test both models with <span class="math inline">\(F^*=\frac{(RSS_{NH}-RSS_{AH})/(df_{NH}-df_{AH})}{\hat\sigma_{AH}^2}\)</span> Larger value of F provide evidence against the NH and in favor of the AH. To judge the worth of the submodel, look at the mean squared error (MSE) of a fitted value from the submodel:</p>
+<p>Now, the majority of significant terms reduced their P even mxPH is now significant, so will this model be better than the last one. You can test both models with <span class="math inline">\(F^*=\frac{(RSS_{NH}-RSS_{AH})/(df_{NH}-df_{AH})}{\hat\sigma_{AH}^2}\)</span> Larger value of F provide evidence against the NH and in favor of the AH. To judge the worth of the submodel, look at the mean squared error (MSE) of a fitted value from the submodel:</p>
 <p>In R we will use the function <code>anova(model1,model2)</code> to test which model is better.</p>
 <pre class="r"><code>anova(fit_HA,fit_H0)
 ## Analysis of Variance Table
@@ -116,12 +117,12 @@ summary(fit_HA)
 ##   Res.Df    RSS Df Sum of Sq      F Pr(&gt;F)
 ## 1    115 5760.4                           
 ## 2    106 5524.6  9    235.78 0.5027 0.8697</code></pre>
-<p>Our F-value is small meaning that dropping terms did not change the variance so we can keep the reduced model.
-As you may have realized maybe there are several options <span class="math inline">\(2^k\)</span> with k terms that it will be time-consuming so we will let the machine to calculate and use <em>Stepwise regression</em>.</p>
+<p>Our F-value is small, meaning that dropping terms did not change the variance to keep the reduced model.
+As you may have realized, maybe there are several options <span class="math inline">\(2^k\)</span> with k terms that will be time-consuming, so we will let the machine calculate and use <em>Stepwise regression</em>.</p>
 </div>
 <div id="stepwise-regression" class="section level2">
 <h2>Stepwise regression</h2>
-<p>Realized by successively adding/deleting terms to a base model. We can consider this because including highly correlated terms in a regression model can inflate the variances of estimates, fitted values and of predictions. So it is better to remove highly correlated terms from a regression model <em>linearity assumption</em>.</p>
+<p>It is realized by successively adding/deleting terms to a base model. We can consider this because including highly correlated terms in a regression model can inflate the variances of estimates, fitted values, and predictions. So it is better to remove highly correlated terms from a regression model <em>linearity assumption</em>.</p>
 <pre class="r"><code>full.model &lt;- lm(a3~., data = algae_a3)
 # Stepwise regression model
 step.model &lt;- MASS::stepAIC(full.model, direction = &quot;both&quot;, 
@@ -150,7 +151,7 @@ summary(step.model)
 ## Residual standard error: 7.077 on 115 degrees of freedom
 ## Multiple R-squared:  0.2184, Adjusted R-squared:  0.1776 
 ## F-statistic: 5.356 on 6 and 115 DF,  p-value: 6.589e-05</code></pre>
-<p>You got two options; forward selection this will add terms one by one until the t-statistic for the next term is less than the reference cutoff; backward elimination, terms are deleted until the t-statistics for the next term to be deleted is greater than the cutoff. The final and suggested model will have the smallest AIC. Look at all the different models by using <code>trace=TRUE</code>.</p>
-<p>Nevertheless,there are a few articles <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2656.2006.01141.x">1</a>, <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1399-3054.2010.01431.x">2</a>, and other <a href="http://goodsciencebadscience.nl/?p=424">posts</a> that consider sequential fitting bias and likely to give you false readings as multiple testings are being run. Algorithmic stepwise model selection can overstate significance, therefore, you can use Factor analysis, Partial Least Squares Regression, or Least Absolute Shrinkage and Selection Operator (LASSO) that group or constrain the coefficient estimates in some way. Packages in R like <code>pls, lars, or glmnet</code> can help with the tasks.</p>
+<p>You got two options; forward selection will add terms one by one until the t-statistic for the next term is less than the reference cutoff; backward elimination, terms are deleted until the t-statistics for the next term to be deleted is greater than the cutoff. The final and suggested model will have the smallest AIC. Look at all the different models by using <code>trace=TRUE</code>.</p>
+<p>Nevertheless, there are a few articles <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2656.2006.01141.x">1</a>, <a href="https://onlinelibrary.wiley.com/doi/full/10.1111/j.1399-3054.2010.01431.x">2</a>, and other <a href="http://goodsciencebadscience.nl/?p=424">posts</a> that consider sequential fitting bias and likely to give you false readings as multiple testings are being run. Algorithmic stepwise model selection can overstate significance; therefore, you can use <code>Factor analysis</code>, <code>Partial Least Squares Regression</code>, or <code>Least Absolute Shrinkage and Selection Operator (LASSO)</code> that group or constrain the coefficient estimates in some way. Packages in R like <code>pls, lars, or glmnet</code> can help with the tasks.</p>
 </div>
 </div>

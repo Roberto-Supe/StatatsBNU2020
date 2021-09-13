@@ -39,7 +39,7 @@ library(plotly)
 #install.packages("package_name")
 ```
 
-Linear regressions can be fit to any data, this also means that you may get similar regression results even with different data that is because you are fitting the best option to reduce the variance between your points. Let`s look at the following plots with similar regression results,$\sigma^2$, and $R^2$ but with different observations and distributions.
+Linear regressions can fit any data; this also means that you may get similar regression results even with different data because you fit the best option to reduce the variance between your points. Let`s look at the following plots with similar regression results,$\sigma^2$, and $R^2$ but with different observations and distributions.
 
 ```{r,out.width="50%",fig.show='hold',echo=FALSE}
 x=4:14
@@ -72,7 +72,7 @@ ggplot(plots,mapping=aes(x=c(rep(8,10),19),y=influential))+
   theme_test(base_size = b)
 ```
 
-Some of these plots may be extreme cases and it does not require statistical analysis to determine that one point is influencing our regression, but in the case of outliers, it may not be that obvious. Therefore, for general practice as mention in [assumptions for linear regression](https://stats-bnu-2020.netlify.app/2020/09/30/week-2-regression-and-fitting-models/) it is required that you look at the residual plots.
+Some of these plots may be extreme cases, and it does not require statistical analysis to determine that one point is influencing our regression, but in the case of outliers, it may not be that obvious. Therefore, for general practice as mention in [assumptions for linear regression](https://stats-bnu-2020.netlify.app/2020/09/30/week-2-regression-and-fitting-models/) it is required that you look at the residual plots.
 
 ```{r,fig.show='hold',out.width="50%"}
 fit.1<-lm(Model~x,plots)
@@ -85,7 +85,7 @@ fit.1<-lm(Curvature~c(rep(8,10),19),plots) #data in different formats
 residualPlot(fit.1)
 ```
 
-The best residuals sit on the `0` line (y-axis) but in general the closer to this line the better. Similarly, they are scattered along with the extent of x. **If the residual plot demonstrates either residuals or variance of residuals is not constant, then we must conclude that the model is incorrect in some respect, but we may not be able to tell if the problem is due to a misspecified mean function or a misspecified variance function.**. Now, let's use our algae data and fit a regression to analyze some indicators. 
+The best residuals sit on the `0` line (y-axis) but in general, the closer to this line, the better. Similarly, they are scattered along with the extent of x. **If the residual plot demonstrates either residuals or variance of residuals is not constant, then we must conclude that the model is incorrect in some respect. Still, we may not be able to tell if the problem is due to a misspecified mean function or a misspecified variance function.**. Now, let's use our algae data and fit a regression to analyze some indicators. 
 
 ```{r}
 fit1<-lm(NO3~mxPH+Cl,data=algae)
@@ -93,8 +93,8 @@ fit1<-lm(NO3~mxPH+Cl,data=algae)
 plot(fit1$residuals)
 ```
 
-In these data set we have one clear outlier so we should treat that observation. 
-We can also plot residuals against individual predictors $x_k$ 
+In these datasets, we have one clear outlier, so we should treat that observation. 
+We can also plot residuals against individual predictors $x_k$. 
 
 ```{r fig.show='hold',out.width="50%"}
 plot(x = fit1$model$mxPH,y = fit1$residuals)
@@ -102,7 +102,7 @@ abline(0,0)
 a<-car::residualPlot(fit1,variable="Cl")
 ```
 
-There are a few packages for these tests and we will have a look at a ggplot2 option.
+There are a few packages for these tests, and we will have a look at a ggplot2 option.
 
 ```{r }
 x<-olsrr::ols_plot_resid_fit(fit1,print_plot = F)+
@@ -110,34 +110,20 @@ x<-olsrr::ols_plot_resid_fit(fit1,print_plot = F)+
 ggplotly(x)
 ```
 
-`olsrr` has a lot of different plots you can have a look at its [package information](https://cran.r-project.org/web/packages/olsrr/olsrr.pdf) to build great ordinary least squares regression models.
+`olsrr` has many different plots. You can have a look at its [package information](https://cran.r-project.org/web/packages/olsrr/olsrr.pdf) to build great ordinary least squares regression models.
 
 
 ### Testing for Nonconstant Variance
 
-Breusch–Pagan test determines whether the variance of the errors from a regression model is dependent on the values of the independent variables. In that case, heteroskedasticity is present. If the test statistic has a p-value below an appropriate threshold (e.g. p < 0.05) then the null hypothesis of homoskedasticity is rejected and heteroskedasticity assumed. 
+Breusch–Pagan test determines whether the variance of the errors from a regression model depends on the independent variables' values. In that case, heteroskedasticity is present. If the test statistic has a p-value below an appropriate threshold (e.g., p < 0.05), then the null hypothesis of homoskedasticity is rejected, and heteroskedasticity is assumed. 
 
 ```{r}
 ncvTest(fit1)
 ```
-Here, we are concluding that there is heteroskedasticity (bad), so the variation of our terms is dependent on the values of the independent variable. There are a few common ways to fix heteroscedasticity:
+Here, we conclude that there is heteroskedasticity (bad), so the variation of our terms depends on the values of the independent variable. There are a few common ways to fix heteroscedasticity:
 
-1. Transform the dependent variable, simply take the log of the dependent variable.
+1. Transform the dependent variable; take the log of the dependent variable.
 2. Redefine the dependent variable by adding something like a *rate*.
 3. Use weighted regression [week 6](https://stats-bnu-2020.netlify.app/2020/11/11/week-6-weights-and-lack-of-fit/).
 4. Lastly, we can perform a different model by removing those outliers (Next Week). 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

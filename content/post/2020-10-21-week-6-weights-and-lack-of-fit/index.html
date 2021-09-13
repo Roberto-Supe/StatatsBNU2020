@@ -18,12 +18,13 @@ tags:
   - lack of fit
 ---
 
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
 
 
-<p>👩 This week we will use the following packages as always, load them at the beginning of the session 👨</p>
+<p>👩 This week, we will use the following packages as always, load them at the beginning of the session 👨.</p>
 <pre class="r"><code>library(tidyverse)
 library(EnvStats)</code></pre>
-<p>This week we will cover the steps that you will need when the assumptions of linear regression are not met.
+<p>We will cover the steps you will need when the assumptions of linear regression are not met.
 If you remember the assumptions for regression are the following:</p>
 <ul>
 <li>Normality</li>
@@ -31,19 +32,19 @@ If you remember the assumptions for regression are the following:</p>
 <li>Homoscedasticity <span class="math inline">\(Var(Y|X)=\sigma^2\)</span></li>
 </ul>
 <p>We should ensure that the model fitted meets all the assumptions. But what if it does not ???</p>
-<p>Usually, having a constant variance over the range of prediction (Homoscedasticity) is a bit problematic. If there is non-constant variance you will need to give <strong>weights</strong> to the cases to match the variances among your points.</p>
+<p>Usually, having a constant variance over the range of prediction (Homoscedasticity) is a bit problematic. If there is non-constant variance, you will need to give <strong>weights</strong> to the cases to match the variances among your points.</p>
 <p>Larger weights causes smaller variance <span class="math inline">\(Var(y_{i}|Xi)=\sigma^2/w_{i}\)</span> where <span class="math inline">\(i=1,...n\)</span> and weights <span class="math inline">\(w_{i}&gt;0\)</span> are known levels. Let’s take the sleeping time of animals as an example.</p>
 <pre class="r"><code>data(msleep)
 ggplot(msleep,aes(x=bodywt,y=sleep_total))+
   geom_point()+
   theme_bw()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>Clearly, we do not have a normal distribution, some animals have very large bodyweight. We will use a log transformation to have a better distribution.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>Clearly, we do not have a normal distribution; some animals have considerable bodyweight. We will use a log transformation to have a better distribution.</p>
 <pre class="r"><code>msleep$bodywt&lt;-log(msleep$bodywt)
 msleep$bodywt[16]
 ## [1] 0
 msleep$bodywt[16]&lt;-0.0000001</code></pre>
-<p>Now body weight is more uniform with a distribution closer to normal. Notice that with log-transformation we encounter a species with a bw=0 so we changed that value as little as possible for our regression analysis because you will get an error if you use 0.</p>
+<p>Now body weight is more uniform with a distribution closer to normal. Notice that with log-transformation, we encounter a species with a bw=0, so we changed that value as little as possible for our regression analysis because you will get an error if you use 0.</p>
 <pre class="r"><code>fit_lm&lt;-lm(sleep_total~bodywt,msleep)
 summary(fit_lm)
 ## 
@@ -64,7 +65,7 @@ summary(fit_lm)
 ## Residual standard error: 3.683 on 81 degrees of freedom
 ## Multiple R-squared:  0.3233, Adjusted R-squared:  0.315 
 ## F-statistic: 38.71 on 1 and 81 DF,  p-value: 2.046e-08</code></pre>
-<p>Now to add weights into the model you will need the parameter <code>weights</code> and type a formula that will be added to each <span class="math inline">\(x_i\)</span></p>
+<p>Now to add weights into the model, you will need the parameter <code>weights</code> and type a formula that will be added to each <span class="math inline">\(x_i\)</span></p>
 <pre class="r"><code>fit_weights&lt;-lm(sleep_total~bodywt,weights = (1/msleep$bodywt^2),data=msleep)
 summary(fit_weights)
 ## 
@@ -96,10 +97,10 @@ summary(fit_weights)
            colour=c(&quot;red&quot;,&quot;navy&quot;), #different colours for each text
            size=8)+
   theme_test()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <div id="lack-of-fit-methods" class="section level1">
 <h1>Lack-of-Fit Methods</h1>
-<p>This part will cover some model checking methods to decide if the form of the mean function used to obtain a fitted model is reasonable in a particular regression. That is, whether there is something wrong with the observations for which the fit is not good.</p>
+<p>This part will cover some model checking methods to decide if the mean function used to obtain a fitted model is reasonable in a particular regression. That is, whether there is something wrong with the observations for which the fit is not good.</p>
 <div id="visual-lack-of-fit-with-smooths" class="section level2">
 <h2>Visual Lack-of-Fit with Smooths</h2>
 <pre class="r"><code>ggplot(msleep,aes(x=bodywt,y=sleep_total))+
@@ -111,14 +112,16 @@ summary(fit_weights)
   stat_smooth(method = &quot;lm&quot;,colour=&quot;tomato&quot;,se=F)+
   annotate(&quot;text&quot;,x=7,y=c(19.5,18,17,16,15),label=c(bquote(&quot;Smoothness value=&quot;~alpha),&quot;0.2&quot;,&quot;0.5&quot;,&quot;0.9&quot;,&quot;default&quot;) ,colour=c(&quot;black&quot;,&quot;steelblue&quot;,&quot;darkgreen&quot;,&quot;violet&quot;,&quot;orange&quot;),parse=T)+
   theme_test(base_size=16)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>Ggplot with <code>geom_smooth</code> or <code>stat_smooth</code> use by default a smooth polynomial regression. That is, for the fit at point <span class="math inline">\(x\)</span>, the fit is made using points in a neighbourhood of <span class="math inline">\(x\)</span>, weighted by their distance from <span class="math inline">\(x\)</span> (with differences in ‘parametric’ variables being ignored when computing the distance). The size of the neighbourhood is controlled by <span class="math inline">\(\alpha\)</span> (set by span=x as in the previous plot). You can find <a href="https://rdrr.io/r/stats/loess.html">more information here</a>.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Ggplot with <code>geom_smooth</code> or <code>stat_smooth</code> use by default a smooth polynomial regression. That is, for the fit at point <span class="math inline">\(x\)</span>, the fit is made using points in a neighborhood of <span class="math inline">\(x\)</span>, weighted by their distance from <span class="math inline">\(x\)</span> (with differences in ‘parametric’ variables being ignored when computing the distance). The size of the neighborhood is controlled by <span class="math inline">\(\alpha\)</span> (set by span=x as in the previous plot). You can find <a href="https://rdrr.io/r/stats/loess.html">more information here</a>.</p>
 <p>We added <code>outfit</code> to the geom_smooth in order to store the <code>..y..</code> values of the fitted regression in a <code>new variable&lt;-</code>. It will only give you 80 points.</p>
 <pre class="r"><code>head(regressionvalues_00,20)
 ##  [1] 13.35127 13.33551 13.31757 13.29744 13.27509 13.25049 13.22363 13.19449
 ##  [9] 13.16304 13.12927 13.09314 13.05464 13.01375 12.97037 12.92343 12.87250
 ## [17] 12.81739 12.75796 12.69405 12.62550</code></pre>
-<p>*In these course we focus in linear model but <a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a> can integrate all types of <code>models=</code> (e.g. “lm”, “glm”, “gam”, “loess” or a function from other packages MASS::rlm or mgcv::gam) and <code>formulas=</code> (e.g. y ~ x, y ~ poly(x, 2), y ~ log(x)) once specified.</p>
+<blockquote>
+<p>In these course we focus in linear model but <a href="https://ggplot2.tidyverse.org/reference/geom_smooth.html">geom_smooth</a> can integrate all types of <code>models=</code> (e.g. “lm”, “glm”, “gam”, “loess” or a function from other packages MASS::rlm or mgcv::gam) and <code>formulas=</code> (e.g. y ~ x, y ~ poly(x, 2), y ~ log(x)) once specified.</p>
+</blockquote>
 </div>
 <div id="lack-of-fit-based-on-variance" class="section level2">
 <h2>Lack-of-Fit Based on Variance</h2>
@@ -160,7 +163,7 @@ EnvStats::anovaPE(fit_lm)
 <li><span class="math inline">\(H_0\)</span>: The relationship assumed in the model is reasonable, i.e., there is no lack of fit <span class="math inline">\(\mu_i=\beta_0+\beta_1X_i\)</span>.</li>
 <li><span class="math inline">\(H_A\)</span>: The relationship assumed in the model is not reasonable, i.e., there is lack of fit <span class="math inline">\(\mu_i\neq\beta_0+\beta_1X_i\)</span>.</li>
 </ul>
-<p>In our example, the P-value is small than the significance level α, meaning that we reject the null hypothesis <span class="math inline">\(H_0\)</span> in favour of the alternative <span class="math inline">\(H_A\)</span>. Therefore, there is enough evidence at the α level to conclude that there is a lack of fit in the current model.</p>
+<p>In our example, the P-value is small than the significance level α, meaning that we reject the null hypothesis <span class="math inline">\(H_0\)</span> in favor of the alternative <span class="math inline">\(H_A\)</span>. Therefore, there is enough evidence at the α level to conclude a lack of fit in the current model.</p>
 <p>We get similar <code>lack of fit</code> results with the weighted regression:</p>
 <pre class="r"><code>olsrr::ols_pure_error_anova(fit_weights)
 ##    Lack of Fit F Test    
@@ -184,7 +187,7 @@ EnvStats::anovaPE(fit_weights)
 ## Pure Error         1     0.6    0.55                  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>Therefore, if we test if there is a difference between models we obtain a non-significant difference.</p>
+<p>Therefore, if we test if there is a difference between models, we obtain a non-significant difference.</p>
 <pre class="r"><code>fit2&lt;-lm(msleep$sleep_total~factor(msleep$bodywt),data=msleep)
 anova(fit_weights,fit2)
 ## Analysis of Variance Table

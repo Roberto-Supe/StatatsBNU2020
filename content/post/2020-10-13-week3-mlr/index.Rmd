@@ -15,27 +15,25 @@ knitr::opts_chunk$set(collapse = TRUE,
                    warning = FALSE)
 ```
 
+# Multiple Linear Regression
+
+This week, we will cover multiple linear regression. As in the previous post and in any model you want to do, we will need to test our assumptions and follow some general steps. 
+
+Procedure to perform Multiple Linear Regression:
+
+1. Scatterplot matrix
+1. Fit multiple linear regression models
+1. Calculation estimate parameters, determine their standard errors, obtain tests and confidence intervals.
+1. Evaluation and explanation
+
+<!--more-->
+
+Let's have our data
 
 ```{r}
 library(PerformanceAnalytics)
 library(tidyverse)
 library(psych)
-```
-
-# Multiple Linear Regression
-
-This week we will cover multiple linear regression. As in the previous post and in any model that you want to do we will need to test our assumptions and follow some general steps 
-
-Procedure to perform Multiple Linear Regression:
-
-1. Scatterplot matrix
-2. Fit multiple linear regression models
-3. Calculation estimate parameters, determine their standard errors, obtain tests, and confidence intervals.
-4. Evaluation and explanation
-
-Let's have our data
-
-```{r}
 set.seed(21) #so we get the same results even with a random selection
 df<-data.frame(temperature=rnorm(100,mean = 25,sd=5),
                wind=rnorm(100,mean = 10,sd=1.2),
@@ -48,7 +46,7 @@ head(df,2)
 
 ## MLR Assumption (Independency)
 
-Simple linear regression does not require this test because it has one independent variable. In this chapter, we test linearity and independence of observations (autocorrelation) to determine that independent variables are not too highly correlated.
+Simple linear regression does not require this test because it has one independent variable. This chapter tests the linearity and independence of observations (autocorrelation) to determine that independent variables are not too highly correlated.
 
 ```{r}
 cor(df$temperature,df$wind) #function to test the relationship between your independent variables
@@ -56,7 +54,7 @@ cor(df$temperature,df$wind) #function to test the relationship between your inde
 
 ## Normality and Linearity Assumptions 
 
-We still need to lest the other two assumptions before the model. A function that will save us time is `chart.Correlation`, we can get **Marginal Response Plots** showing correlations and the significance of those correlations (independency), histograms and distributions (normality), and bivariate scatter plot with a fitted line (linearity). Although this does not test the normal distribution you can observe with histograms the distribution of your data for all your numeric variables and make some initial estimations. 
+We still need to lest the other two assumptions before the model. A function that will save us time is `chart.Correlation`, we can get **Marginal Response Plots** showing correlations, and the significance of those correlations (independency), histograms and distributions (normality), and bivariate scatter plot with a fitted line (linearity). Although this does not test the normal distribution, you can observe the distribution of your data for all your numeric variables and make some initial estimations with histograms. 
 
 ```{r}
 chart.Correlation(df[,-5], #numeric data set
@@ -64,7 +62,7 @@ chart.Correlation(df[,-5], #numeric data set
                   method = "pearson") #correlation method "pearson", "kendall", "spearman"
 ```
 
-Similarly, with a few variables then you can use `psych::corr.test` and determine correlation and the significance. What we used for the correlation plot in [week 1](https://stats-bnu-2020.netlify.app/2020/09/23/stats-course-1week/).
+Similarly, you can use `psych::corr.test` with a few variables and determine correlation and significance. What we used for the correlation plot in [week 1]().
 
 ```{r}
 correlation.test <- psych::corr.test(df[,1:4],use = "pairwise",method = "spearman") #relationship between all your variables
@@ -72,7 +70,7 @@ my.correlation<-correlation.test$r # from the test get ($) the correlation value
 p.values.correlation<-correlation.test$p # from the test get ($) the correlation p values
 ```
 
-* Values close to 1 indicate that independent variables are nearly identical meaning that they do not meet the assumptions for multiple linear regression and should be treated or discarded.
+* Values close to 1 indicate that independent variables are nearly identical, meaning they do not meet the assumptions for multiple linear regression and should be treated or discarded.
 
 ## Regression fitting
 
@@ -82,13 +80,13 @@ fit.lm<-lm(bacterias~.,data=df) #all the variables
 summary(fit.lm)
 ```
 
-Breakdown of the elemet of the result:
+Breakdown of the element of the result:
 
-* The estimates `(Estimate)` column gives you the change in y caused by each element of the regression. For `Intercept` or the value of the `y` when all the rest elements are 0 in this case 68.12 bacteria units on each test. Similarly, `temperature/rest of the variables` show changes in y (population of bacteria) with one unit increase in `x`. In other words, the temperature in the full model reduces bacteria population by -0.304 units for each increment in temperature if P < 0.05. Here it is not so we can not reach that conclusion. 
+* The estimates `(Estimate)` column gives you the change in y caused by each element of the regression. For `Intercept` or the value of `y` assuming that all the rest elements are 0, in this case, 68.12 bacteria units on each test. Similarly, `temperature/rest of the variables` show changes in y (population of bacteria) with one unit increase in `x`. In other words, the temperature in the full model reduces the bacteria population by -0.304 units for each increment in temperature if P < 0.05. Here it is not, so we can not reach that conclusion. 
 
 * The standard error of the estimated values in the second column `Std. Error`.
 * The test statistic `t value`.
-* The p-value `Pr(>| t | )`, the probability of finding the given t-statistic and therefore, the calculated `estimate` by chance.
+* The p-value `Pr(>| t | )`, the probability of finding the given t-statistic, and therefore, the calculated `estimate` by chance.
 
 
 ## Model test (Homoscedasticity)
@@ -101,7 +99,7 @@ plot(fit.lm)
 par(mfrow=c(1,1))
 ```
 
-Here we can see that the residial errors are constant across groups and they are distributed evenly. Look at the `Normal Q-Q` (top right) which under homoscedasticity it should show points along the line.
+Here we can see that the residual errors are constant across groups, and they are distributed evenly. Look at the `Normal Q-Q` (top right), which under homoscedasticity it should show points along the line.
 
 ## Leverage and extrapolation
 
@@ -111,5 +109,4 @@ Let's look at that pull for different points.
 
 <iframe height="1000" width="80%" frameborder="no" src="https://roberto-supe.shinyapps.io/leverage_statsBNU/"> </iframe>
 
->Cases with large leverages should be inspected to make sure there are no errors in the data or other problems. We will show some methods to deal with them in the following posts
-
+>Cases with large leverages should be inspected to ensure no errors in the data or similar problems. We will show some methods to deal with them in the following posts.

@@ -26,14 +26,14 @@ knitr::opts_chunk$set(collapse = TRUE,
                    warning = FALSE)
 ```
 
-`r knitr::asis_output("\U1F469")` This week we will use the following packages as always, load them at the beginning of the session `r knitr::asis_output("\U1F468")`
+`r knitr::asis_output("\U1F469")` This week, we will use the following packages as always, load them at the beginning of the session `r knitr::asis_output("\U1F468")`.
 
 ```{r}
 library(tidyverse)
 library(EnvStats)
 ```
 
-This week we will cover the steps that you will need when the assumptions of linear regression are not met.
+We will cover the steps you will need when the assumptions of linear regression are not met.
 If you remember the assumptions for regression are the following:
 
 * Normality
@@ -42,7 +42,7 @@ If you remember the assumptions for regression are the following:
 
 We should ensure that the model fitted meets all the assumptions. But what if it does not ???
 
-Usually, having a constant variance over the range of prediction (Homoscedasticity) is a bit problematic. If there is non-constant variance you will need to give **weights** to the cases to match the variances among your points.
+Usually, having a constant variance over the range of prediction (Homoscedasticity) is a bit problematic. If there is non-constant variance, you will need to give **weights** to the cases to match the variances among your points.
 
 Larger weights causes smaller variance $Var(y_{i}|Xi)=\sigma^2/w_{i}$ where $i=1,...n$ and weights $w_{i}>0$ are known levels. Let's take the sleeping time of animals as an example.
 
@@ -53,21 +53,21 @@ ggplot(msleep,aes(x=bodywt,y=sleep_total))+
   theme_bw()
 ```
 
-Clearly, we do not have a normal distribution, some animals have very large bodyweight. We will use a log transformation to have a better distribution. 
+Clearly, we do not have a normal distribution; some animals have considerable bodyweight. We will use a log transformation to have a better distribution. 
 ```{r}
 msleep$bodywt<-log(msleep$bodywt)
 msleep$bodywt[16]
 msleep$bodywt[16]<-0.0000001
 ```
 
-Now body weight is more uniform with a distribution closer to normal. Notice that with log-transformation we encounter a species with a bw=0 so we changed that value as little as possible for our regression analysis because you will get an error if you use 0.
+Now body weight is more uniform with a distribution closer to normal. Notice that with log-transformation, we encounter a species with a bw=0, so we changed that value as little as possible for our regression analysis because you will get an error if you use 0.
 
 ```{r}
 fit_lm<-lm(sleep_total~bodywt,msleep)
 summary(fit_lm)
 ```
 
-Now to add weights into the model you will need the parameter `weights` and type a formula that will be added to each $x_i$
+Now to add weights into the model, you will need the parameter `weights` and type a formula that will be added to each $x_i$
 
 ```{r}
 fit_weights<-lm(sleep_total~bodywt,weights = (1/msleep$bodywt^2),data=msleep)
@@ -91,7 +91,7 @@ ggplot(msleep,aes(x=bodywt,y=sleep_total))+
 
 # Lack-of-Fit Methods
 
-This part will cover some model checking methods to decide if the form of the mean function used to obtain a fitted model is reasonable in a particular regression. That is, whether there is something wrong with the observations for which the fit is not good.
+This part will cover some model checking methods to decide if the mean function used to obtain a fitted model is reasonable in a particular regression. That is, whether there is something wrong with the observations for which the fit is not good.
 
 ## Visual Lack-of-Fit with Smooths
 
@@ -107,14 +107,15 @@ ggplot(msleep,aes(x=bodywt,y=sleep_total))+
   theme_test(base_size=16)
 ```
 
-Ggplot with `geom_smooth` or `stat_smooth` use by default a smooth polynomial regression. That is, for the fit at point $x$, the fit is made using points in a neighbourhood of $x$, weighted by their distance from $x$ (with differences in ‘parametric’ variables being ignored when computing the distance). The size of the neighbourhood is controlled by $\alpha$ (set by span=x as in the previous plot). You can find [more information here](https://rdrr.io/r/stats/loess.html).
+Ggplot with `geom_smooth` or `stat_smooth` use by default a smooth polynomial regression. That is, for the fit at point $x$, the fit is made using points in a neighborhood of $x$, weighted by their distance from $x$ (with differences in ‘parametric’ variables being ignored when computing the distance). The size of the neighborhood is controlled by $\alpha$ (set by span=x as in the previous plot). You can find [more information here](https://rdrr.io/r/stats/loess.html).
 
 We added `outfit` to the geom_smooth in order to store the `..y..` values of the fitted regression in a `new variable<-`. It will only give you 80 points. 
+
 ```{r}
 head(regressionvalues_00,20)
 ```
 
-*In these course we focus in linear model but [geom_smooth](https://ggplot2.tidyverse.org/reference/geom_smooth.html) can integrate all types of `models=` (e.g. "lm", "glm", "gam", "loess" or a function from other packages MASS::rlm or mgcv::gam) and `formulas=` (e.g. y ~ x, y ~ poly(x, 2), y ~ log(x)) once specified. 
+> In these course we focus in linear model but [geom_smooth](https://ggplot2.tidyverse.org/reference/geom_smooth.html) can integrate all types of `models=` (e.g. "lm", "glm", "gam", "loess" or a function from other packages MASS::rlm or mgcv::gam) and `formulas=` (e.g. y ~ x, y ~ poly(x, 2), y ~ log(x)) once specified. 
 
 
 ## Lack-of-Fit Based on Variance
@@ -137,7 +138,7 @@ The F-statistic $F^*=\frac{MSLF}{MSPE}$ for the `Lack of fit` helps us in testin
 * $H_0$: The relationship assumed in the model is reasonable, i.e., there is no lack of fit $\mu_i=\beta_0+\beta_1X_i$.
 * $H_A$: The relationship assumed in the model is not reasonable, i.e., there is lack of fit $\mu_i\neq\beta_0+\beta_1X_i$.
 
-In our example, the P-value is small than the significance level α, meaning that we reject the null hypothesis $H_0$ in favour of the alternative $H_A$. Therefore, there is enough evidence at the α level to conclude that there is a lack of fit in the current model.
+In our example, the P-value is small than the significance level α, meaning that we reject the null hypothesis $H_0$ in favor of the alternative $H_A$. Therefore, there is enough evidence at the α level to conclude a lack of fit in the current model.
 
 We get similar `lack of fit` results with the weighted regression:
 
@@ -145,11 +146,10 @@ We get similar `lack of fit` results with the weighted regression:
 olsrr::ols_pure_error_anova(fit_weights)
 EnvStats::anovaPE(fit_weights)
 ```
-Therefore, if we test if there is a difference between models we obtain a non-significant difference.
+Therefore, if we test if there is a difference between models, we obtain a non-significant difference.
 
 ```{r}
 fit2<-lm(msleep$sleep_total~factor(msleep$bodywt),data=msleep)
 anova(fit_weights,fit2)
 ```
-
 

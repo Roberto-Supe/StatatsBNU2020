@@ -47,9 +47,9 @@ library(plotly)
 #install.packages("package_name")
 ```
 
-This week we will look at observations with high influence on the regression. They can change the distribution of residuals or significantly reduce the variation explained by the model $R^2$.
+This week, we will look at observations with high influence on the regression. They can change the distribution of residuals or significantly reduce the variation explained by the model $R^2$.
 
-Separated or outlying points can cause us to miss important trends by reducing visual resolution in the plots. They also have a large influence on the results of the analysis.
+Separated or outlying points can cause us to miss significant trends by reducing visual resolution in the plots. They also have a considerable influence on the results of the analysis.
 
 Some methods to deal with them: 
 
@@ -89,7 +89,7 @@ ggplot()+
 
 ```
 
-geom_text_repel does not work as expected so we use geom_text and move the text to the right so we can have some space between the points. 
+geom_text_repel does not work as expected, so we use geom_text and move the text to the right to have some space between the points. 
 
 ```{r}
 p=ggplot(outlier.data)+
@@ -105,9 +105,9 @@ plotly::ggplotly(p)
 ## Cook's Distance
 
 Cook’s distance is a mathematical measure of the impact of deleting a case on the estimated regression coefficients **not a statistical test**. 
-Each case or sample has one Cook’s distance $D$ value and the plot orders them in terms of their influence on the fitted $hat_y$.
+Each case or sample has one Cook’s distance $D$ value, and the plot orders them in terms of their influence on the fitted $hat_y$.
 
-It is generally useful to study cases with $D_i>0.5$ and important to study cases with $D_i>1$.
+It is generally helpful to study cases with $D_i>0.5$ and essential to review cases with $D_i>1$.
 
 
 ```{r}
@@ -125,7 +125,7 @@ influential=cooksd[cooksd>(4*mean(cooksd, na.rm=T))]  # get the influential row 
 filtered_data<-algae[-which(row.names(algae) %in% names(influential)),] #remove the rows inside influential
 head(algae[names(influential), ])  # influential observations.
 ```
-We do not have a variable unique to each observation so we will need to use `row.names()` as well as the `names()` which takes the row number for each value inside influential. 
+We do not have a variable unique to each observation, so we will need to use `row.names()` as well as the `names()`, which takes the row number for each value inside influential. 
 
 We can use a different package for this style of plot.
 
@@ -143,7 +143,7 @@ fit2<-lm(NO3~mxPH+Cl,data=algae[-as.integer(values),]) #our second regression
 
 ## Test for outliers
 
-The function `outlierTest` from car package gives the most extreme observation based on the given model by using the Bonferroni Outlier Test.
+The function `outlierTest` from the `car` package gives the most extreme observation based on the given model using the Bonferroni Outlier Test.
 
 ```{r}
 car::outlierTest(fit1,n.max=Inf) #the largest influence cause by this value 
@@ -151,13 +151,13 @@ fit3<-lm(NO3~mxPH+Cl,data=algae[-153,]) #remove that observation
 car::outlierTest(fit3) #the largest influence in the new model
 ```
 
-With the package `Outliers` we calculate the extreme observations. First let's look at the extremest value with `outlier`.
+With the package `Outliers`, we calculate the extreme observations. First, let's look at the extremest value with `outlier`.
 
 ```{r}
 outlier(algae$Cl)
 ```
 
-Use the scores function to calculates normal, t, chi-squared, IQR and MAD scores of given data.
+Use the scores function to calculates standard, t, chi-squared, IQR, and MAD scores of given data.
 
 ```{r}
 head(scores(na.omit(algae$Cl), type="chisq"))
@@ -178,7 +178,7 @@ summary(fit2)
 
 We can see changes in the estimates as in the $Adjusted R^2$.
 
-Finally, the function `plot` is great to test distribution, variance or outliers.
+Finally, the function `plot` is excellent to test distribution, variance, or outliers.
 
 ```{r}
 par(mfrow=c(2,2))
@@ -192,7 +192,7 @@ plot(fit2)
 
 # More detailed information
 
-Recent packages integrate more complex statistics to ggplot2. We can have a look at the boxplots created with ggstatsplot.
+Recent packages integrate more complex statistics to ggplot2. We can have a look at the boxplots created with `ggstatsplot`.
 
 ```{r}
 library(ggstatsplot)
@@ -200,7 +200,7 @@ ggbetweenstats(algae,x = season,y=Cl,outlier.tagging = T)
 ```
 
 
-We have some outliers so we can try removing them
+We have some outliers, so we can try removing them
 ```{r}
 Q <- quantile(algae$Cl, probs=c(.25, .75), na.rm = T) #calculate 25% and 75%
 iqr <- IQR(algae$Cl,na.rm = T) #IQR of the data
@@ -210,7 +210,7 @@ ggbetweenstats(eliminated, x = season,y =  Cl, outlier.tagging = F) #new plot
 
 Package description and [more information](https://cran.r-project.org/web/packages/ggstatsplot/ggstatsplot.pdf):
 
-> ggstatsplot is an extension of ggplot2 package for creating graphics with details from statistical tests included in the plots themselves and targeted primarily at behavioral sciences community to provide a one-line code to produce information-rich plots. In a typical exploratory data analysis workflow, data visualization and statistical modeling are two different phases: visualization informs modeling, and modeling in its turn can suggest a different visualization method, and so on and so forth. The central idea of ggstatsplot is simple: combine these two phases into one in the form of graphics with statistical details, which makes data exploration simpler and faster. Currently, it supports only the most common types of statistical tests (parametric, non-parametric, Bayes Factor, and robust versions of t-test/anova, correlation, regression analyses, contingency tables analyses, and meta-analysis).
+> `ggstatsplot` is an extension of the `ggplot2` package for creating graphics with details from statistical tests included in the plots themselves and targeted primarily at the behavioral sciences community to provide a one-line code to produce information-rich plots. In a typical exploratory data analysis workflow, data visualization and statistical modeling are two different phases: visualization informs modeling, and modeling in its turn can suggest a different visualization method, and so on and so forth. The central idea of ggstatsplot is simple: combine these two phases into one in the form of graphics with statistical details, which makes data exploration simpler and faster. Currently, it supports only the most common types of statistical tests (parametric, non-parametric, Bayes Factor, and robust versions of t-test/ANOVA, correlation, regression analyses, contingency tables analyses, and meta-analysis).
 
 
 

@@ -21,14 +21,15 @@ tags:
   - r
 ---
 
-<script src="index_files/htmlwidgets/htmlwidgets.js"></script>
-<script src="index_files/plotly-binding/plotly.js"></script>
-<script src="index_files/typedarray/typedarray.min.js"></script>
-<script src="index_files/jquery/jquery.min.js"></script>
-<link href="index_files/crosstalk/css/crosstalk.css" rel="stylesheet" />
-<script src="index_files/crosstalk/js/crosstalk.min.js"></script>
-<link href="index_files/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
-<script src="index_files/plotly-main/plotly-latest.min.js"></script>
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+<script src="{{< blogdown/postref >}}index_files/htmlwidgets/htmlwidgets.js"></script>
+<script src="{{< blogdown/postref >}}index_files/plotly-binding/plotly.js"></script>
+<script src="{{< blogdown/postref >}}index_files/typedarray/typedarray.min.js"></script>
+<script src="{{< blogdown/postref >}}index_files/jquery/jquery.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/crosstalk/js/crosstalk.min.js"></script>
+<link href="{{< blogdown/postref >}}index_files/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/plotly-main/plotly-latest.min.js"></script>
 
 
 <p>👩 This week we will use the following packages as always, load them at the beginning of the session 👨</p>
@@ -44,8 +45,8 @@ library(ggrepel)
 library(ggstatsplot)
 library(plotly)
 #install.packages(&quot;package_name&quot;)</code></pre>
-<p>This week we will look at observations with high influence on the regression. They can change the distribution of residuals or significantly reduce the variation explained by the model <span class="math inline">\(R^2\)</span>.</p>
-<p>Separated or outlying points can cause us to miss important trends by reducing visual resolution in the plots. They also have a large influence on the results of the analysis.</p>
+<p>This week, we will look at observations with high influence on the regression. They can change the distribution of residuals or significantly reduce the variation explained by the model <span class="math inline">\(R^2\)</span>.</p>
+<p>Separated or outlying points can cause us to miss significant trends by reducing visual resolution in the plots. They also have a considerable influence on the results of the analysis.</p>
 <p>Some methods to deal with them:</p>
 <ul>
 <li>Transformations of the data to more suitable scales</li>
@@ -60,7 +61,7 @@ library(plotly)
 outliers&lt;-boxplot.stats(algae$Cl)$out
 boxplot(algae$Cl, main=&quot;Pressure Height&quot;, boxwex=0.1)
 mtext(paste(&quot;Outliers: &quot;, paste(outliers, collapse=&quot;, &quot;)), cex=0.5,at = c(0.8,300),outer = F)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 <pre class="r"><code>
 calculate_outlier &lt;- function(x) {
   return(x &lt; quantile(x, 0.25) - 1.5 * IQR(x) | x &gt; quantile(x, 0.75) + 1.5 * IQR(x))
@@ -77,8 +78,8 @@ ggplot()+
   geom_text_repel(outlier.data,mapping=aes(x=variables,y=values,label=outlier))+
   facet_wrap(variables~.,scales = &quot;free&quot;)+
   theme_bw()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<p>geom_text_repel does not work as expected so we use geom_text and move the text to the right so we can have some space between the points.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>geom_text_repel does not work as expected, so we use geom_text and move the text to the right to have some space between the points.</p>
 <pre class="r"><code>p=ggplot(outlier.data)+
   geom_boxplot(mapping=aes(x=variables,y=values))+
   geom_text(mapping=aes(x=variables,y=values,label=outlier),nudge_x = 0.1)+
@@ -94,15 +95,15 @@ plotly::ggplotly(p)</code></pre>
 <div id="cooks-distance" class="section level2">
 <h2>Cook’s Distance</h2>
 <p>Cook’s distance is a mathematical measure of the impact of deleting a case on the estimated regression coefficients <strong>not a statistical test</strong>.
-Each case or sample has one Cook’s distance <span class="math inline">\(D\)</span> value and the plot orders them in terms of their influence on the fitted <span class="math inline">\(hat_y\)</span>.</p>
-<p>It is generally useful to study cases with <span class="math inline">\(D_i&gt;0.5\)</span> and important to study cases with <span class="math inline">\(D_i&gt;1\)</span>.</p>
+Each case or sample has one Cook’s distance <span class="math inline">\(D\)</span> value, and the plot orders them in terms of their influence on the fitted <span class="math inline">\(hat_y\)</span>.</p>
+<p>It is generally helpful to study cases with <span class="math inline">\(D_i&gt;0.5\)</span> and essential to review cases with <span class="math inline">\(D_i&gt;1\)</span>.</p>
 <pre class="r"><code>fit1&lt;-lm(NO3~mxPH+Cl,data=algae) #
 cooksd &lt;- cooks.distance(fit1) #store the D of each point in a named numeric form
 plot(cooksd, pch=&quot;*&quot;, cex=2, main=&quot;Influential Obs by Cooks distance&quot;)  # plot cook&#39;s distance
 abline(h = 4*mean(cooksd, na.rm=T), col=&quot;red&quot;)  # add cutoff line
 text(x=1:length(cooksd)+1, y=cooksd, col=&quot;red&quot;,adj = c(0.15,0.1), 
      labels=ifelse(cooksd&gt;4*mean(cooksd, na.rm=T),names(cooksd),&quot;&quot;))  # add labels</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <p>Get the information about these extreme observations.</p>
 <pre class="r"><code>influential=cooksd[cooksd&gt;(4*mean(cooksd, na.rm=T))]  # get the influential row numbers
 filtered_data&lt;-algae[-which(row.names(algae) %in% names(influential)),] #remove the rows inside influential
@@ -113,11 +114,11 @@ head(algae[names(influential), ])  # influential observations.
 ##      a3  a4  a5   a6  a7
 ## 134 4.2 8.3 1.7  0.0 2.4
 ## 153 0.0 1.2 5.9 77.6 0.0</code></pre>
-<p>We do not have a variable unique to each observation so we will need to use <code>row.names()</code> as well as the <code>names()</code> which takes the row number for each value inside influential.</p>
+<p>We do not have a variable unique to each observation, so we will need to use <code>row.names()</code> as well as the <code>names()</code>, which takes the row number for each value inside influential.</p>
 <p>We can use a different package for this style of plot.</p>
 <pre class="r"><code>a=olsrr::ols_plot_cooksd_chart(model = fit1,print_plot = T)+
     theme_bw()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>In this case we got values that are different to the rows in the main data set so we can have a look at the plot data to get the actual rows.</p>
 <pre class="r"><code>values=row.names(a$data[(a$data$fct_color==&quot;outlier&quot;),])
 values
@@ -126,7 +127,7 @@ fit2&lt;-lm(NO3~mxPH+Cl,data=algae[-as.integer(values),]) #our second regression
 </div>
 <div id="test-for-outliers" class="section level2">
 <h2>Test for outliers</h2>
-<p>The function <code>outlierTest</code> from car package gives the most extreme observation based on the given model by using the Bonferroni Outlier Test.</p>
+<p>The function <code>outlierTest</code> from the <code>car</code> package gives the most extreme observation based on the given model using the Bonferroni Outlier Test.</p>
 <pre class="r"><code>car::outlierTest(fit1,n.max=Inf) #the largest influence cause by this value 
 ##     rstudent unadjusted p-value Bonferroni p
 ## 153 19.80916         1.3401e-47   2.5328e-45
@@ -136,10 +137,10 @@ car::outlierTest(fit3) #the largest influence in the new model
 ## Largest |rstudent|:
 ##   rstudent unadjusted p-value Bonferroni p
 ## 5 3.490858         0.00060268       0.1133</code></pre>
-<p>With the package <code>Outliers</code> we calculate the extreme observations. First let’s look at the extremest value with <code>outlier</code>.</p>
+<p>With the package <code>Outliers</code>, we calculate the extreme observations. First, let’s look at the extremest value with <code>outlier</code>.</p>
 <pre class="r"><code>outlier(algae$Cl)
 ## [1] 391.5</code></pre>
-<p>Use the scores function to calculates normal, t, chi-squared, IQR and MAD scores of given data.</p>
+<p>Use the scores function to calculates standard, t, chi-squared, IQR, and MAD scores of given data.</p>
 <pre class="r"><code>head(scores(na.omit(algae$Cl), type=&quot;chisq&quot;))
 ## [1] 0.134322963 0.090826050 0.005962813 0.518682218 0.062562936 0.222972355</code></pre>
 <p>We can test which observations are beyond a given probability (percentile).</p>
@@ -197,28 +198,28 @@ summary(fit2)
 ## Multiple R-squared:  0.1853, Adjusted R-squared:  0.1765 
 ## F-statistic: 20.93 on 2 and 184 DF,  p-value: 6.464e-09</code></pre>
 <p>We can see changes in the estimates as in the <span class="math inline">\(Adjusted R^2\)</span>.</p>
-<p>Finally, the function <code>plot</code> is great to test distribution, variance or outliers.</p>
+<p>Finally, the function <code>plot</code> is excellent to test distribution, variance, or outliers.</p>
 <pre class="r"><code>par(mfrow=c(2,2))
 plot(fit1)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <pre class="r"><code>par(mfrow=c(2,2))
 plot(fit2)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 </div>
 <div id="more-detailed-information" class="section level1">
 <h1>More detailed information</h1>
-<p>Recent packages integrate more complex statistics to ggplot2. We can have a look at the boxplots created with ggstatsplot.</p>
+<p>Recent packages integrate more complex statistics to ggplot2. We can have a look at the boxplots created with <code>ggstatsplot</code>.</p>
 <pre class="r"><code>library(ggstatsplot)
 ggbetweenstats(algae,x = season,y=Cl,outlier.tagging = T)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
-<p>We have some outliers so we can try removing them</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>We have some outliers, so we can try removing them</p>
 <pre class="r"><code>Q &lt;- quantile(algae$Cl, probs=c(.25, .75), na.rm = T) #calculate 25% and 75%
 iqr &lt;- IQR(algae$Cl,na.rm = T) #IQR of the data
 eliminated&lt;- subset(algae, algae$Cl &gt; (Q[1] - 1.5*iqr) &amp; algae$Cl  &lt; (Q[2]+1.5*iqr)) #rows with extreme observations out
 ggbetweenstats(eliminated, x = season,y =  Cl, outlier.tagging = F) #new plot</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
 <p>Package description and <a href="https://cran.r-project.org/web/packages/ggstatsplot/ggstatsplot.pdf">more information</a>:</p>
 <blockquote>
-<p>ggstatsplot is an extension of ggplot2 package for creating graphics with details from statistical tests included in the plots themselves and targeted primarily at behavioral sciences community to provide a one-line code to produce information-rich plots. In a typical exploratory data analysis workflow, data visualization and statistical modeling are two different phases: visualization informs modeling, and modeling in its turn can suggest a different visualization method, and so on and so forth. The central idea of ggstatsplot is simple: combine these two phases into one in the form of graphics with statistical details, which makes data exploration simpler and faster. Currently, it supports only the most common types of statistical tests (parametric, non-parametric, Bayes Factor, and robust versions of t-test/anova, correlation, regression analyses, contingency tables analyses, and meta-analysis).</p>
+<p><code>ggstatsplot</code> is an extension of the <code>ggplot2</code> package for creating graphics with details from statistical tests included in the plots themselves and targeted primarily at the behavioral sciences community to provide a one-line code to produce information-rich plots. In a typical exploratory data analysis workflow, data visualization and statistical modeling are two different phases: visualization informs modeling, and modeling in its turn can suggest a different visualization method, and so on and so forth. The central idea of ggstatsplot is simple: combine these two phases into one in the form of graphics with statistical details, which makes data exploration simpler and faster. Currently, it supports only the most common types of statistical tests (parametric, non-parametric, Bayes Factor, and robust versions of t-test/ANOVA, correlation, regression analyses, contingency tables analyses, and meta-analysis).</p>
 </blockquote>
 </div>

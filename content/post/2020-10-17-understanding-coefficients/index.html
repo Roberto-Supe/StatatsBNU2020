@@ -7,9 +7,10 @@ categories: ["R"]
 tags: ["R Markdown", "plot", "regression"]
 ---
 
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
 
 
-<p>👩 This week we will use the following packages as always, load them at the beginning of the session 👨</p>
+<p>👩 This week, we will use the following packages as always, load them at the beginning of the session 👨</p>
 <pre class="r"><code>library(tidyverse)
 library(ggpmisc)
 library(DMwR)
@@ -18,13 +19,15 @@ library(DMwR)
 <h1>Interpreting Coefficients</h1>
 <div id="rate-of-change" class="section level2">
 <h2>Rate of Change</h2>
-<p>The simplest or the most basic explanation of the coefficient <em><em>n</em></em>.</p>
+<p>The simplest or the most basic explanation of the coefficient <em><em>n</em></em>:</p>
+<blockquote>
 <p>A regression coefficient can be interpreted as the change in the expected response given a change in the corresponding term by one unit, <strong>assuming that other terms are held fixed</strong>.</p>
+</blockquote>
 <p><code>However, with polynomial equations, the plot of the fitted curve is likely to be more informative than the values of the parameters</code>.</p>
 </div>
 <div id="reparameterization" class="section level2">
 <h2>Reparameterization</h2>
-<p>Sometimes, we need to consider replacing terms with linear or non linear transformations of them. In general, to make new variables you can use the function mutate form <code>dplyr</code>’s package.</p>
+<p>Sometimes, we need to consider replacing terms with linear or nonlinear transformations. In general, to make new variables, you can use the function <code>mutate</code> from the <code>dplyr</code> package.</p>
 <pre class="r"><code>data(&quot;airquality&quot;)
 airquality&lt;-mutate(airquality,A=Wind/Ozone,B=Solar.R*Wind)
 lm(Temp~Wind+Solar.R,airquality)
@@ -51,11 +54,10 @@ lm(Temp~Solar.R+B,airquality)
 ## Coefficients:
 ## (Intercept)      Solar.R            B  
 ##   72.173521     0.083718    -0.005224</code></pre>
-<p>However, after linear transformation of the terms or the response, the fitting model has the same <span class="math inline">\(df\)</span> <span class="math inline">\(\hat{\sigma}\)</span>, <span class="math inline">\(R^2\)</span> and the overall F statistics also known as <strong>Invariance</strong>.</p>
 </div>
 <div id="standardization-of-terms" class="section level2">
 <h2>Standardization of Terms</h2>
-<p>Terms usually come with different units, to get the relative importance, do rescaling:</p>
+<p>Terms usually come with different units, to get the relative importance, do <code>rescaling</code>:</p>
 <pre class="r"><code>#install.packages(&quot;DMwR&quot;) #install the ReScaling function
 library(DMwR)
 scaled_data&lt;-data.frame(
@@ -66,16 +68,16 @@ a=data.frame(do.call(cbind,
                    lapply(airquality, #variables output in list
                           ReScaling, #function
                           t.mx=50,t.mn=1))) #required arguments for the function</code></pre>
-<p>It is more informative than the untransformed coefficients. But still may miss leading. E.g. sampling over a small range versus over a large range for the same population.</p>
+<p>It is more informative than the untransformed coefficients. But still may miss leading, e.g., sampling over a small range versus a large range for the same population.</p>
 </div>
 <div id="sampling-distributions" class="section level2">
 <h2>Sampling Distributions</h2>
-<p>The coefficients are useful and inference can be made <em>ONLY IF</em> the samples were taken <strong>randomly</strong>. In certain conditions, we can assume the samples to be random samples and then explain the regression coefficients and making statistical inferences. But a lot of times, we can not do this.</p>
+<p>The coefficients are useful, and we can understand the data <em>ONLY IF</em> the samples were taken <strong>randomly</strong>. In certain conditions, we can assume the samples to be random samples and then explain the regression coefficients and making statistical inferences. But a lot of times, we can not do this.</p>
 </div>
 </div>
 <div id="d-added-variable-plots" class="section level1">
 <h1>2D-Added variable plots</h1>
-<p>The Added Variable Plot helps us to visualizi the effect of each term in the model. They evaluate the residuals (and coefficients) of the predictor variables holding other variables constant, a visual assessment of the <em>net effect</em>.</p>
+<p>The Added Variable Plot helps us to visualize the effect of each term in the model. They evaluate the predictor variables’ residuals (and coefficients) holding other variables constant, a visual assessment of the <em>net effect</em>.</p>
 <p>First, let’s look at the individual regression.</p>
 <pre class="r"><code>my.formula &lt;- y ~ x
 ggplot(airquality,aes(y=Temp,x=Wind))+
@@ -86,6 +88,7 @@ ggplot(airquality,aes(y=Temp,x=Wind))+
                 aes(label = paste(..eq.label.., ..rr.label.., sep = &quot;~~~&quot;)), 
                 parse = TRUE,colour=&quot;Blue&quot;,label.y = 0.12,size=5)+
   theme(text = element_text(size=13))
+
 ggplot(airquality,aes(y=Temp,x=Solar.R))+
   geom_point()+
   geom_smooth(method = lm,colour=&quot;red&quot;)+
@@ -93,8 +96,8 @@ ggplot(airquality,aes(y=Temp,x=Solar.R))+
                 aes(label = paste(..eq.label.., ..rr.label.., sep = &quot;~~~&quot;)), 
                 parse = TRUE,colour=&quot;red&quot;,label.y = 0.85,size=5)+
   theme_bw(base_size = 15)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="50%" /><img src="index_files/figure-html/unnamed-chunk-5-2.png" width="50%" /></p>
-<p>Now we will fit a multiple linear regression and explore the variable that has the biggest impact on temperature.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="50%" /><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-2.png" width="50%" /></p>
+<p>Now we will fit a multiple linear regression and explore the variable that has the most significant impact on temperature.</p>
 <pre class="r"><code>fit.lm&lt;-lm(Temp~Wind+Solar.R+Ozone,airquality)
 summary(fit.lm)
 ## 
@@ -118,12 +121,12 @@ summary(fit.lm)
 ##   (42 observations deleted due to missingness)
 ## Multiple R-squared:  0.4999, Adjusted R-squared:  0.4858 
 ## F-statistic: 35.65 on 3 and 107 DF,  p-value: 4.729e-16</code></pre>
-<p>Looks like <code>Ozone</code> has an impact on temperature. Let’s get our 2D-AVP with the help of the <code>car</code> package.</p>
+<p>It looks like <code>Ozone</code> has an impact on temperature. Let’s get our 2D-AVP with the help of the <code>car</code> package.</p>
 <pre class="r"><code>#install.packages(&quot;car&quot;)
 library(car)
 avPlots(fit.lm)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>Here we can also observe that Ozone has the greatest impact on temperature. There are a few observations like 117 showing some influence on the data and may need to take into consideration.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Here we can also observe that Ozone has the greatest impact on temperature. A few observations like 117 show some influence on the data and may need to be taken into further consideration.</p>
 <div id="three-extreme-avp-cases" class="section level3">
 <h3>Three extreme AVP cases:</h3>
 <div id="points-on-a-diagonal-line" class="section level4">
@@ -138,7 +141,7 @@ ggplot(points,aes(x,y))+
            label=bquote(&quot;\u00EA(&quot;~y~&quot;|&quot;~u[1]*&quot;) = \u00EA(&quot;~u[2]~&quot;|&quot;~u[1]*&quot;)&quot;),
            size=10,colour=&quot;steelblue&quot;)+
   theme_bw(base_size = 15)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="points-on-horizontal-line" class="section level4">
 <h4>Points on Horizontal Line:</h4>
@@ -151,7 +154,7 @@ ggplot(points,aes(x,y))+
   scale_y_continuous(limits = c(-2,2))+
   annotate(&quot;text&quot;,x = -1,y=0.5,label=bquote(&quot;\u00EA(&quot;~y~&quot;|&quot;~u[1]~&quot;) = 0&quot;),size=10,colour=&quot;steelblue&quot;)+
   theme_bw(base_size = 15)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 <div id="points-on-a-vertical-line" class="section level4">
 <h4>Points on a Vertical Line:</h4>
@@ -164,13 +167,13 @@ ggplot(points,aes(x,y))+
   scale_x_continuous(limits = c(-2,2))+
   annotate(&quot;text&quot;,x = -1,y=2,label=bquote(&quot;\u00EA(&quot;~u[2]~&quot;|&quot;~u[1]~&quot;) = 0&quot;),size=10,colour=&quot;navy&quot;)+
   theme_bw(base_size = 15)</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
 </div>
 </div>
 <div id="variance-covariance-matrix" class="section level2">
 <h2>Variance-Covariance matrix</h2>
-<p>A variance-covariance matrix is a square matrix showing the variances and covariances of your model variables. The diagonal elements of the matrix contain the variances of your variables and the off-diagonal values show the covariances between pairs of variables.</p>
-<p>To create the matrix use the function <code>vcov</code> from the package stats already installed in R by default.</p>
+<p>A variance-covariance matrix is a square matrix showing the variances and covariances of your model variables. The diagonal elements of the matrix contain the variances of your variables, and the off-diagonal values show the covariances between pairs of variables.</p>
+<p>To create the matrix, use the function <code>vcov</code> from the package stats already installed in R by default.</p>
 <pre class="r"><code>vcov(fit.lm)
 ##              (Intercept)          Wind       Solar.R         Ozone
 ## (Intercept) 10.339599186 -0.6607207525 -5.880952e-03 -0.0537960883
@@ -214,6 +217,6 @@ ggplot(points,aes(x,y))+
            size=8)+ #point - mean
   scale_y_continuous(expand = c(0,0.1))+
   theme_bw()</code></pre>
-<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
 </div>
