@@ -17,9 +17,6 @@ tags: ["R Markdown", "plot", "regression"]
 </div>
 <div id="pareto-chart" class="section level2">
 <h2>Pareto Chart</h2>
-</div>
-<div id="pareto-chart-1" class="section level2">
-<h2>Pareto Chart</h2>
 <p>We mentioned that figures are important, in these posts we will give you some tips and code to create some graphs with R.</p>
 <p>First, we need a data set.</p>
 <pre class="r"><code>#install.packages(qcc) #Remove the first # and run to install a package that will let you plot the pareto Chart
@@ -110,7 +107,9 @@ head(usa.pop,2)
                     point.size = 3, 
                     line.color = &quot;black&quot;,
                     bars.fill = c(&quot;steelblue&quot;,&quot;tomato&quot;))+ #fill of the bars is continuous therefore you need to set the first and last and you will get a gradient for all the bars 
- theme_bw() #remove the background color and keep the major and minor axis and some other plot structures </code></pre>
+ theme_bw() #remove the background color and keep the major and minor axis and some other plot structures 
+usa.pop=usa.pop[order(usa.pop$Change,decreasing = T),] #order the data set by the values of Change in a decreasing order
+usa.pop$State&lt;-factor(usa.pop$State,levels = usa.pop$State) #countries labels in the right place</code></pre>
 <p>This plot clearly looks much better with more control over the elements. There are a few things that we can change to make them better, like labels better <code>axis</code>, a <code>legend</code> because a double y-axis can mislead the readers. We will use all the data set in the following example as R is better at working with large data sets.</p>
 <pre class="r"><code>#install.packages(scales) # use the percent and other notation on the axis
 p +

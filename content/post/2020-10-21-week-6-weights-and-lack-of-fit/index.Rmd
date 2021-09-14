@@ -144,12 +144,19 @@ We get similar `lack of fit` results with the weighted regression:
 
 ```{r}
 olsrr::ols_pure_error_anova(fit_weights)
-EnvStats::anovaPE(fit_weights)
 ```
-Therefore, if we test if there is a difference between models, we obtain a non-significant difference.
+Therefore, we should add better weights; if not, we can test our models.
+
+## Model comparison
+
+Now we can find out which model is the best fit for our data using **Akaike information criterion** (AIC) model selection and `aictab` from the `AICcmodavg` package.
+
+AIC calculates the best-fit model by finding the model that explains the largest amount of variation in the response variable while using the fewest parameters.
 
 ```{r}
-fit2<-lm(msleep$sleep_total~factor(msleep$bodywt),data=msleep)
-anova(fit_weights,fit2)
+library(AICcmodavg)
+aictab(list(fit_lm,fit_weights),modnames = c("Normal LM","Weighted LM"))
 ```
+
+The model that fits our data the best will be at the top. In this example, our `Normal LM`.
 

@@ -179,22 +179,21 @@ EnvStats::anovaPE(fit_lm)
 ## Residual        81       1e+28    1.234568e+26                             
 ##  Lack of fit    80       1e+28        1.25e+26     2.5e+28     5.03052e-15 
 ##  Pure Error      1       0.005           0.005                             
-## --------------------------------------------------------------------------
-EnvStats::anovaPE(fit_weights)
-##                   Df  Sum Sq Mean Sq F value  Pr(&gt;F)  
-## bodywt             1   216.5  216.52  393.37 0.03207 *
-## Lack of Fit       80 17760.9  222.01  403.35 0.03959 *
-## Pure Error         1     0.6    0.55                  
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<p>Therefore, if we test if there is a difference between models, we obtain a non-significant difference.</p>
-<pre class="r"><code>fit2&lt;-lm(msleep$sleep_total~factor(msleep$bodywt),data=msleep)
-anova(fit_weights,fit2)
-## Analysis of Variance Table
+## --------------------------------------------------------------------------</code></pre>
+<p>Therefore, we should add better weights; if not, we can test our models.</p>
+</div>
+<div id="model-comparison" class="section level2">
+<h2>Model comparison</h2>
+<p>Now we can find out which model is the best fit for our data using <strong>Akaike information criterion</strong> (AIC) model selection and <code>aictab</code> from the <code>AICcmodavg</code> package.</p>
+<p>AIC calculates the best-fit model by finding the model that explains the largest amount of variation in the response variable while using the fewest parameters.</p>
+<pre class="r"><code>library(AICcmodavg)
+aictab(list(fit_lm,fit_weights),modnames = c(&quot;Normal LM&quot;,&quot;Weighted LM&quot;))
 ## 
-## Response: sleep_total
-##           Df  Sum Sq Mean Sq F value Pr(&gt;F)
-## bodywt     1   216.5  216.52  0.9874 0.3233
-## Residuals 81 17761.4  219.28</code></pre>
+## Model selection based on AICc:
+## 
+##             K   AICc Delta_AICc AICcWt Cum.Wt      LL
+## Normal LM   3 456.26       0.00      1      1 -224.98
+## Weighted LM 3 754.31     298.05      0      1 -374.00</code></pre>
+<p>The model that fits our data the best will be at the top. In this example, our <code>Normal LM</code>.</p>
 </div>
 </div>

@@ -24,8 +24,6 @@ In these documents, we will provide you with the code required to replicate the 
 
 ## Pareto Chart
 
-## Pareto Chart
-
 We mentioned that figures are important, in these posts we will give you some tips and code to create some graphs with R. 
 
 First, we need a data set.
@@ -108,6 +106,8 @@ p=ggplot(data = usa.pop,mapping = aes(x=State,y=Change))+
                     line.color = "black",
                     bars.fill = c("steelblue","tomato"))+ #fill of the bars is continuous therefore you need to set the first and last and you will get a gradient for all the bars 
  theme_bw() #remove the background color and keep the major and minor axis and some other plot structures 
+usa.pop=usa.pop[order(usa.pop$Change,decreasing = T),] #order the data set by the values of Change in a decreasing order
+usa.pop$State<-factor(usa.pop$State,levels = usa.pop$State) #countries labels in the right place
 ```
 
 This plot clearly looks much better with more control over the elements. There are a few things that we can change to make them better, like labels better `axis`, a `legend` because a double y-axis can mislead the readers. We will use all the data set in the following example as R is better at working with large data sets. 
